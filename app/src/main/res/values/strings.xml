@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">fArt</string>
+    <string name="choose_based_on">Choose picture based on</string>
+    <string name="artist">Artist</string>
+    <string name="category">Category</string>
+    <string name="my_cart">My Cart</string>
+    <string name="num_chosen_pics">Number of pictures: </string>
+    <string name="total_price">Total price: </string>
+    <string name="number_of_photos">Number of photos: %d</string>
+    <string name="most_expensive_photo">Most expensive photo:</string>
+    <string name="featured_photo">Featured photo:</string>
+</resources>
