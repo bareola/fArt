@@ -73,6 +73,4 @@ class Database {
 
 			return categoryPhotoMap
 		}
-	 fun
-
 }

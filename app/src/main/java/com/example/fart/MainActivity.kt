@@ -31,6 +31,13 @@ fun FullPreview() {
 @Composable
 fun PhotocardPreview() {
 	FArtTheme {
-		Photocard()
+	}
+}
+@Preview
+@Composable
+fun PhotoScreenPreview() {
+	FArtTheme {
+		PhotoScreen()
+
 	}
 }
