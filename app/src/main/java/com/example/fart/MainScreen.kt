@@ -1,5 +1,6 @@
 package com.example.fart
 
+import AppViewModel
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -9,17 +10,23 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import com.example.fart.ui.theme.FArtTheme
 
 
 @Composable
-fun MainScreen() {
+fun MainScreen(appViewModel: AppViewModel = viewModel(), navController: NavController) {
+	val uiState by appViewModel.uiState.collectAsState()
+
 	Column {
 		BasicAppBar("Ola")
-		ChooseBasedOn()
+		ChooseBasedOn(navController, appViewModel)
 		ShoppingCart()
 	}
 }
@@ -31,21 +38,26 @@ fun BasicAppBar(title: String) {
 }
 
 @Composable
-fun ChooseBasedOn() {
+fun ChooseBasedOn(navController: NavController, appViewModel: AppViewModel) {
 	Column {
 		Text(text = stringResource(id = R.string.choose_based_on))
 		Row {
-			Button(onClick = { /*TODO*/ }) {
+			Button(onClick = {
+				navController.navigate(Screen.SelectScreen.withArgs("artist"))
+			}) {
 				Text(text = stringResource(id = R.string.artist))
 			}
-			Button(onClick = { /*TODO*/ }) {
+			Button(onClick = {
+				navController.navigate(Screen.SelectScreen.withArgs("category"))
+			}) {
 				Text(text = stringResource(id = R.string.category))
 			}
 		}
 	}
 }
+
 @Composable
-fun ShoppingCart () {
+fun ShoppingCart() {
 	Column {
 		Text(text = stringResource(id = R.string.my_cart))
 		Text(text = stringResource(id = R.string.num_chosen_pics))
@@ -55,20 +67,19 @@ fun ShoppingCart () {
 }
 
 @Composable
-fun ArtistCard(title: String, numPhotos: Int, mostExpensive: String, featured: String) {
-	Card {
-		Row {			//placeholder for a photo of a painting
-			Column {
-				Text(text = title)
-				Text(text = numPhotos.toString())
-				Text(text = mostExpensive)
-				Text(text = featured)
-			}
-		}
+fun ShoppingCartCard() {
+	Card { }
+}
+
+@Preview
+@Composable
+fun FullPreview() {
+	FArtTheme {		//MainScreen()
 	}
 }
+
+@Preview
 @Composable
-fun ShoppingCartCard() {
-	Card {
-	}
+fun PhotocardPreview() {
+	FArtTheme { }
 }

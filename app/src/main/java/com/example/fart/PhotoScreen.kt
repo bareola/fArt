@@ -23,9 +23,11 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.fart.data.Database
 import com.example.fart.data.Photo
+import com.example.fart.ui.theme.FArtTheme
 
 val db = Database()
 
@@ -91,3 +93,19 @@ fun PhotoCard(photo: Photo, artistName: String) {
 
 
 
+@Preview
+@Composable
+fun PhotoCardPreview() {
+	FArtTheme {
+		PhotoCard(db.loadPhotos().first(), db.findAllArtists().first().name)
+
+	}
+}
+@Preview
+@Composable
+fun PhotoScreenPreview() {
+	FArtTheme {
+		PhotoScreen()
+
+	}
+}
