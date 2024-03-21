@@ -13,7 +13,10 @@ sealed class Category(val name: String, @DrawableRes val picture: Int) {
 	object Food : Category("Food", R.drawable.food)
 	object Art : Category("Art", R.drawable.art)
 	object Other : Category("Other", R.drawable.other)
-	override fun toString(): String {return name}
+
+	override fun toString(): String {
+		return name
+	}
 }
 
 sealed class ListItem {
@@ -33,6 +36,10 @@ data class Photo(
 	val resourceId: Int,
 	val categories: List<Category>,
 	val price: Double
+)
+
+data class ItemCardData(
+	val name: String, val picture: Int, val photos: List<Photo>
 )
 
 class Database {

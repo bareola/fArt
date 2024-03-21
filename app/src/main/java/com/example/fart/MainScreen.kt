@@ -16,20 +16,39 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
 import com.example.fart.ui.theme.FArtTheme
 
 
 @Composable
-fun MainScreen(appViewModel: AppViewModel = viewModel(), navController: NavController) {
+fun MainScreen(appViewModel: AppViewModel = viewModel()) {
 	val uiState by appViewModel.uiState.collectAsState()
 
 	Column {
 		BasicAppBar("Ola")
-		ChooseBasedOn(navController, appViewModel)
+		ChooseBasedOn(appViewModel)
 		ShoppingCart()
 	}
 }
+
+@Composable
+fun ChooseBasedOn(appViewModel: AppViewModel) {
+	Column {
+		Text(text = stringResource(id = R.string.choose_based_on))
+		Row {
+			Button(onClick = {
+				appViewModel.navigateToArtistScreen()
+			}) {
+				Text(text = stringResource(id = R.string.artist))
+			}
+			Button(onClick = {
+				appViewModel.navigateToCategoryScreen()
+			}) {
+				Text(text = stringResource(id = R.string.category))
+			}
+		}
+	}
+}
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -37,24 +56,6 @@ fun BasicAppBar(title: String) {
 	TopAppBar(title = { Text(text = title) }, modifier = Modifier.fillMaxWidth())
 }
 
-@Composable
-fun ChooseBasedOn(navController: NavController, appViewModel: AppViewModel) {
-	Column {
-		Text(text = stringResource(id = R.string.choose_based_on))
-		Row {
-			Button(onClick = {
-				navController.navigate(Screen.SelectScreen.withArgs("artist"))
-			}) {
-				Text(text = stringResource(id = R.string.artist))
-			}
-			Button(onClick = {
-				navController.navigate(Screen.SelectScreen.withArgs("category"))
-			}) {
-				Text(text = stringResource(id = R.string.category))
-			}
-		}
-	}
-}
 
 @Composable
 fun ShoppingCart() {
@@ -74,7 +75,7 @@ fun ShoppingCartCard() {
 @Preview
 @Composable
 fun FullPreview() {
-	FArtTheme {		//MainScreen()
+	FArtTheme {        //MainScreen()
 	}
 }
 

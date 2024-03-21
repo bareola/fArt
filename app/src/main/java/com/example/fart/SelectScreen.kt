@@ -22,48 +22,34 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.fart.data.ListItem
-import com.example.fart.data.Photo
 
 
 @Composable
-fun ItemCard(item: ListItem) {
-	val name: String
-	val picture: Int
-	val photos: List<Photo>
+fun ItemCard(item: ListItem, viewModel: AppViewModel) {
+	val cardData = viewModel.getCardData(item)
 
-	when (item) {
-		is ListItem.ArtistItem -> {
-			name = item.artist.name
-			picture = item.artist.picture
-			photos = item.artist.photos
-		}
-
-		is ListItem.CategoryItem -> {
-			name = item.category.name
-			picture = item.category.picture
-			photos = item.photos
-		}
-	}
-
-	Card(modifier = Modifier.fillMaxWidth().clickable { }) {
+	Card(modifier = Modifier
+		.fillMaxWidth()
+		.clickable { }) {
 		Row {
 			Image(
-				painter = painterResource(id = picture),
-				contentDescription = "$name photo",
+				painter = painterResource(id = cardData.picture),
+				contentDescription = "${cardData.name} photo",
 				modifier = Modifier
 					.size(64.dp)
 					.align(Alignment.CenterVertically)
 					.padding(4.dp)
 			)
 			Column {
-				Text(text = name)
-				Text(text = photos.size.toString())
-				Text(text = photos.maxOf { it.price }.toString())
-				Text(text = photos.random().title)
+				Text(text = cardData.name)
+				Text(text = cardData.photos.size.toString())
+				Text(text = cardData.photos.maxOf { it.price }.toString())
+				Text(text = cardData.photos.random().title)
 			}
 		}
 	}
 }
+
 
 @Composable
 fun SelectList(items: List<ListItem>, paddingValues: PaddingValues) {
@@ -74,8 +60,8 @@ fun SelectList(items: List<ListItem>, paddingValues: PaddingValues) {
 	) {
 		items.forEach { item ->
 			when (item) {
-				is ListItem.ArtistItem -> ItemCard(item = item)
-				is ListItem.CategoryItem -> ItemCard(item = item)
+				is ListItem.ArtistItem -> ItemCard(item = item, viewModel = viewModel())
+				is ListItem.CategoryItem -> ItemCard(item = item, viewModel = viewModel())
 			}
 		}
 	}
