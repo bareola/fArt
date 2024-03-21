@@ -107,17 +107,18 @@ class Database {
 
 	fun findAllArtists(): List<Artist> = artists
 
-	fun findNumberOfPhotos(artist: Artist): Int = artist.numberOfPhotos()
+	fun findAllCategories(): List<Category> {
+		return loadPhotos().flatMap { it.categories }.distinct()
+	}
 
 	fun findPhotosByCategory(category: Category): List<Photo> {
 		val allPhotos = loadPhotos()
 		return allPhotos.filter { it.categories.contains(category) }
 	}
 
-	fun findPhotosByArtist(artist: Artist): List<Photo> {
-		return artist.photos
+	fun findPhotosByArtist(artistName: String): List<Photo> {
+		return findAllArtists().find { it.name == artistName }?.photos ?: emptyList()
 	}
-
 
 	fun findCategoriesWithPhotos(): List<ListItem.CategoryItem> {
 		Log.d("Debug", "findCategoriesWithPhotos called")

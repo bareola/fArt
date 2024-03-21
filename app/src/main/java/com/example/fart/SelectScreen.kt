@@ -26,12 +26,12 @@ import com.example.fart.data.ListItem
 
 
 @Composable
-fun ItemCard(item: ListItem, viewModel: AppViewModel) {
+fun ItemCard(item: ListItem, viewModel: AppViewModel, onItemSelect: (String) -> Unit) {
 	val cardData = viewModel.getCardData(item)
 
 	Card(modifier = Modifier
 		.fillMaxWidth()
-		.clickable { }) {
+		.clickable {onItemSelect(cardData.name) }) {
 		Row {
 			Image(
 				painter = painterResource(id = cardData.picture),
@@ -51,17 +51,20 @@ fun ItemCard(item: ListItem, viewModel: AppViewModel) {
 	}
 }
 @Composable
-fun SelectList(items: List<ListItem>, paddingValues: PaddingValues, appViewModel: AppViewModel) {
+fun SelectList(items: List<ListItem>, viewModel: AppViewModel, paddingValues: PaddingValues) {
 	Column(
 		modifier = Modifier
 			.padding(paddingValues)
 			.fillMaxWidth()
 	) {
 		items.forEach { item ->
-			ItemCard(item = item, viewModel = appViewModel)
+			ItemCard(item = item, viewModel = viewModel) { selectedItem ->
+				viewModel.navigateToPhotoScreen(selectedItem)
+			}
 		}
 	}
 }
+
 
 @Composable
 fun SelectScreen(type: String, appViewModel: AppViewModel = viewModel()) {
@@ -79,8 +82,8 @@ fun SelectScreen(type: String, appViewModel: AppViewModel = viewModel()) {
 		topBar = { BasicAppBar(title = uiState.title) },
 		content = { paddingValues ->
 			when (type) {
-				"artist" -> SelectList(uiState.artistItems, paddingValues, appViewModel)
-				"category" -> SelectList(uiState.categoryItems, paddingValues, appViewModel)
+				"artist" -> SelectList(uiState.artistItems, appViewModel, paddingValues)
+				"category" -> SelectList(uiState.categoryItems, appViewModel, paddingValues)
 				else -> {}
 			}
 		}

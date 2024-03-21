@@ -71,16 +71,3 @@ fun ShoppingCart() {
 fun ShoppingCartCard() {
 	Card { }
 }
-
-@Preview
-@Composable
-fun FullPreview() {
-	FArtTheme {        //MainScreen()
-	}
-}
-
-@Preview
-@Composable
-fun PhotocardPreview() {
-	FArtTheme { }
-}

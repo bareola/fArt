@@ -11,13 +11,19 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 
 sealed class Screen(val route: String) {
-    object MainScreen : Screen("mainScreen")
-    class SelectScreen(val type: String) : Screen("selectScreen/$type") {
-        companion object {
-            fun createRoute(type: String) = "selectScreen/$type"
-        }
-    }
+	object MainScreen : Screen("mainScreen")
+	class SelectScreen(val type: String) : Screen("selectScreen/$type") {
+		companion object {
+			fun createRoute(type: String) = "selectScreen/$type"
+		}
+	}
+	class PhotoScreen(val selectedItem: String) : Screen("photoScreen/$selectedItem") {
+		companion object {
+			fun createRoute(selectedItem: String) = "photoScreen/$selectedItem"
+		}
+	}
 }
+
 
 @Composable
 fun AppNavigator(appViewModel: AppViewModel) {
@@ -47,6 +53,17 @@ fun AppNavigator(appViewModel: AppViewModel) {
 			val type = backStackEntry.arguments?.getString("type")
 			if (type != null) {
 				SelectScreen(type, appViewModel = appViewModel)
+			}
+		}
+		composable(
+			route = Screen.PhotoScreen("{selectedItem}").route,
+			arguments = listOf(navArgument("selectedItem") {
+				type = androidx.navigation.NavType.StringType
+			})
+		) { backStackEntry ->
+			val selectedItem = backStackEntry.arguments?.getString("selectedItem")
+			if (selectedItem != null) {
+				PhotoScreen(selectedItem)
 			}
 		}
 	}

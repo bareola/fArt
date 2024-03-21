@@ -66,4 +66,7 @@ class AppViewModel(private val database: Database = Database()) : ViewModel() {
 	fun navigateToCategoryScreen() {
 		_currentScreen.value = Screen.SelectScreen("category")
 	}
+	fun navigateToPhotoScreen(selectedItem: String) {
+		_currentScreen.value = Screen.PhotoScreen(selectedItem)
+	}
 }

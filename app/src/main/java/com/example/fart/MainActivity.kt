@@ -10,7 +10,7 @@ class MainActivity : ComponentActivity() {
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
 		setContent {
-			FArtTheme { // A surface container using the 'background' color from the theme
+			FArtTheme {
 				val appViewModel = AppViewModel()
 				AppNavigator(appViewModel)
 

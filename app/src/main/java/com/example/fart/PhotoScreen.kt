@@ -23,37 +23,40 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.fart.data.Category
 import com.example.fart.data.Database
 import com.example.fart.data.Photo
-import com.example.fart.ui.theme.FArtTheme
 
 val db = Database()
 
 
 @Composable
-fun PhotoScreen() {
- Scaffold(
-  topBar = { BasicAppBar(title = "Photos") },
-  content = { paddingValues -> Photogrid(paddingValues) }
- )
+fun PhotoScreen(selectedItem: String) {
+	Scaffold(topBar = { BasicAppBar(title = selectedItem) },
+		content = { paddingValues -> Photogrid(selectedItem, paddingValues) })
 }
 
 @Composable
-fun Photogrid(paddingValues: PaddingValues) {
-	val photos = db.loadPhotos()
-	val artistMap = db.findAllArtists().associateBy { it.name }  // Map artist name to Artist object
+fun Photogrid(selectedItem: String, paddingValues: PaddingValues) {
+	val photos = when (val category = db.findAllCategories().find { it.name == selectedItem }) {
+		null -> db.findPhotosByArtist(selectedItem)
+		else -> db.findPhotosByCategory(category)
+	}
 
-	LazyVerticalGrid(columns = GridCells.Fixed(2), contentPadding = paddingValues, modifier = Modifier.fillMaxSize()) {
+	LazyVerticalGrid(
+		columns = GridCells.Fixed(2),
+		contentPadding = paddingValues,
+		modifier = Modifier.fillMaxSize()
+	) {
 		items(photos.size) { index ->
 			val photo = photos[index]
-			val artistName =
-				artistMap[photo.title]?.name ?: "" // Get artist name from map, handle missing data
+			val artistName = db.findAllArtists().find { artist -> artist.photos.contains(photo) }?.name ?: "Unknown"
 			PhotoCard(photo, artistName)
 		}
 	}
 }
+
 
 
 @Composable
@@ -65,10 +68,11 @@ fun PhotoCard(photo: Photo, artistName: String) {
 			.fillMaxWidth()
 			.aspectRatio(1.5f)
 			.padding(4.dp)
-			.background(brush = Brush.linearGradient(
-				colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.3f))
-			)),
-		elevation = CardDefaults.cardElevation(4.dp)
+			.background(
+				brush = Brush.linearGradient(
+					colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.3f))
+				)
+			), elevation = CardDefaults.cardElevation(4.dp)
 	) {
 		Box(
 			contentAlignment = Alignment.BottomCenter
@@ -88,24 +92,5 @@ fun PhotoCard(photo: Photo, artistName: String) {
 				Text(text = photo.price.toString())
 			}
 		}
-	}
-}
-
-
-
-@Preview
-@Composable
-fun PhotoCardPreview() {
-	FArtTheme {
-		PhotoCard(db.loadPhotos().first(), db.findAllArtists().first().name)
-
-	}
-}
-@Preview
-@Composable
-fun PhotoScreenPreview() {
-	FArtTheme {
-		PhotoScreen()
-
 	}
 }
