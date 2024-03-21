@@ -14,6 +14,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -49,20 +50,15 @@ fun ItemCard(item: ListItem, viewModel: AppViewModel) {
 		}
 	}
 }
-
-
 @Composable
-fun SelectList(items: List<ListItem>, paddingValues: PaddingValues) {
+fun SelectList(items: List<ListItem>, paddingValues: PaddingValues, appViewModel: AppViewModel) {
 	Column(
 		modifier = Modifier
 			.padding(paddingValues)
 			.fillMaxWidth()
 	) {
 		items.forEach { item ->
-			when (item) {
-				is ListItem.ArtistItem -> ItemCard(item = item, viewModel = viewModel())
-				is ListItem.CategoryItem -> ItemCard(item = item, viewModel = viewModel())
-			}
+			ItemCard(item = item, viewModel = appViewModel)
 		}
 	}
 }
@@ -72,18 +68,23 @@ fun SelectScreen(type: String, appViewModel: AppViewModel = viewModel()) {
 	Log.d("Debug", "SelectScreen called with type: $type")
 	val uiState by appViewModel.uiState.collectAsState()
 
-	when (type) {
-		"artist" -> appViewModel.loadArtistItems()
-		"category" -> appViewModel.loadCategoryItems()
+	LaunchedEffect(type) {
+		when (type) {
+			"artist" -> appViewModel.loadArtistItems()
+			"category" -> appViewModel.loadCategoryItems()
+		}
 	}
 
-	Scaffold(topBar = { BasicAppBar(title = uiState.title) }, // Use state for the title
-		content = { paddingValues -> // Pass the relevant items list based on the type
+	Scaffold(
+		topBar = { BasicAppBar(title = uiState.title) },
+		content = { paddingValues ->
 			when (type) {
-				"artist" -> SelectList(uiState.artistItems, paddingValues)
-				"category" -> SelectList(uiState.categoryItems, paddingValues)
+				"artist" -> SelectList(uiState.artistItems, paddingValues, appViewModel)
+				"category" -> SelectList(uiState.categoryItems, paddingValues, appViewModel)
 				else -> {}
 			}
-		})
+		}
+	)
 }
+
 
