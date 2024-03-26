@@ -1,7 +1,9 @@
 package com.example.fart
 
+import AppViewModel
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -25,20 +27,21 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import com.example.fart.data.AppViewModel
+import com.example.fart.data.AppUiState
 import com.example.fart.data.Photo
 
 @Composable
-fun PhotoScreen(viewModel: AppViewModel, navigateToSinglePhotoScreen: (Int) -> Unit) {
+fun PhotoScreen(viewModel: AppViewModel, navigateToSinglePhotoScreen: (Int) -> Unit = {}) {
 	val uiState = viewModel.uiState.collectAsState().value
 	Scaffold(topBar = { BasicAppBar(title = "Photos") }, content = { paddingValues ->
-		PhotoGrid(photos = uiState.selectedItems, paddingValues = paddingValues)
+		PhotoGrid(uiState = uiState, paddingValues = paddingValues, navigateToSinglePhotoScreen = navigateToSinglePhotoScreen, viewModel = viewModel)
 	})
 }
 
 
 @Composable
-fun PhotoGrid(photos: List<Photo>, paddingValues: PaddingValues) {
+fun PhotoGrid(uiState: AppUiState, paddingValues: PaddingValues, navigateToSinglePhotoScreen: (Int) -> Unit = {}, viewModel: AppViewModel) {
+	val photos = uiState.selectedItems
 	LazyVerticalGrid(
 		columns = GridCells.Fixed(2),
 		contentPadding = paddingValues,
@@ -46,20 +49,22 @@ fun PhotoGrid(photos: List<Photo>, paddingValues: PaddingValues) {
 	) {
 		items(photos.size) { index ->
 			val photo =
-				photos[index]			// Assuming you have a way to determine the artist's name from the photo,
-			// otherwise, you can leave it as "Unknown" or modify according to your data structure.
-			PhotoCard(photo) // Update this according to your data structure
+				photos[index]
+			PhotoCard(photo, navigateToSinglePhotoScreen = navigateToSinglePhotoScreen, viewModel = viewModel)
 		}
 	}
 }
 
 
 @Composable
-fun PhotoCard(photo: Photo) {
+fun PhotoCard(photo: Photo, navigateToSinglePhotoScreen: (Int) -> Unit = {}, viewModel: AppViewModel) {
+
 	val imageId = photo.resourceId
 
 	Card(
 		modifier = Modifier
+			.clickable {viewModel.setSelectedItem(photo)
+				navigateToSinglePhotoScreen(photo.id) }
 			.fillMaxWidth()
 			.aspectRatio(1.5f)
 			.padding(4.dp)

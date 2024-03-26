@@ -1,5 +1,6 @@
 package com.example.fart
 
+import AppViewModel
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -20,7 +21,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.example.fart.data.AppViewModel
 import com.example.fart.data.Photo
 import com.example.fart.data.SelectionMode
 
@@ -42,14 +42,14 @@ fun ChooseBasedOn(navigateToSelectScreen: (String) -> Unit, appViewModel: AppVie
 		Text(text = stringResource(id = R.string.choose_based_on))
 		Row {
 			Button(onClick = {
-				appViewModel.setSelectionMode(SelectionMode.ARTIST);
+				appViewModel.updateSelection(SelectionMode.ARTIST);
 				navigateToSelectScreen(SelectionMode.ARTIST.name)
 			}) {
 				Text(text = stringResource(id = R.string.artist))
 			}
 			Spacer(modifier = Modifier.width(8.dp))
 			Button(onClick = {
-				appViewModel.setSelectionMode(SelectionMode.CATEGORY)
+				appViewModel.updateSelection(SelectionMode.CATEGORY)
 				navigateToSelectScreen(SelectionMode.CATEGORY.name)
 			}) {
 				Text(text = stringResource(id = R.string.category))

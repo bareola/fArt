@@ -1,5 +1,6 @@
 package com.example.fart
 
+import AppViewModel
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -18,9 +19,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import com.example.fart.data.AppViewModel
+import com.example.fart.data.AppUiState
 import com.example.fart.data.ListItem
-import com.example.fart.data.Photo
 import com.example.fart.data.SelectionMode
 
 @Composable
@@ -82,35 +82,27 @@ fun SelectList(
 fun SelectScreen(navigateToPhotoScreen: (String) -> Unit, viewModel: AppViewModel) {
 	val uiState by viewModel.uiState.collectAsState()
 	Scaffold(topBar = {
-		BasicAppBar(
-			title = when (uiState.selectionMode) {
-				SelectionMode.ARTIST -> "Select Artist"
-				SelectionMode.CATEGORY -> "Select Category"
-				else -> "Neither artist or category selected"
-			}
-		)
+		BasicAppBar(title = getSelectScreenTitle(uiState.selectionMode))
 	}, content = { paddingValues ->
-		when (uiState.selectionMode) {
-			SelectionMode.ARTIST -> SelectList(
-
-				items = uiState.artistItems,
-				onItemSelect = { selectedItem ->
-					viewModel.setSelectedArtist(selectedItem)
-					navigateToPhotoScreen(selectedItem)
-				},
-				paddingValues = paddingValues
-			)
-
-			SelectionMode.CATEGORY -> SelectList(
-				items = uiState.categoryItems,
-				onItemSelect = { selectedItem ->
-					viewModel.setSelectedArtist(selectedItem)
-					navigateToPhotoScreen(selectedItem)
-				},
-				paddingValues = paddingValues
-			)
-
-			else -> Text("Please select a mode from the main menu")
-		}
+		SelectList(
+			items = getItemsForSelectionMode(uiState), onItemSelect = { selectedItem ->
+				viewModel.updateSelection(uiState.selectionMode, selectedItem)
+				navigateToPhotoScreen(selectedItem)
+			}, paddingValues = paddingValues
+		)
 	})
 }
+
+fun getSelectScreenTitle(selectionMode: SelectionMode): String = when (selectionMode) {
+	SelectionMode.ARTIST -> "Select Artist"
+	SelectionMode.CATEGORY -> "Select Category"
+	else -> "Select Mode"
+}
+
+fun getItemsForSelectionMode(uiState: AppUiState): List<ListItem> = when (uiState.selectionMode) {
+	SelectionMode.ARTIST -> uiState.artistItems
+	SelectionMode.CATEGORY -> uiState.categoryItems
+	else -> emptyList()
+}
+
+

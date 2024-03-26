@@ -1,8 +1,11 @@
-package com.example.fart.data
-
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.fart.data.AppUiState
+import com.example.fart.data.Category
+import com.example.fart.data.Database
+import com.example.fart.data.ListItem
+import com.example.fart.data.Photo
+import com.example.fart.data.SelectionMode
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -17,105 +20,68 @@ class AppViewModel(private val database: Database = Database()) : ViewModel() {
 		loadInitialData()
 	}
 
-	fun setSelectionMode(mode: SelectionMode) {
-		viewModelScope.launch {
-			_uiState.update { currentState ->
-				currentState.copy(selectionMode = mode)
-
-			}
-			when (mode) {
-				SelectionMode.ARTIST -> {
-					loadArtistItems()
-
-				}
-				SelectionMode.CATEGORY -> {
-					loadCategoryItems()
-
-				}
-				else -> {Log.d("GIAEVER", "None")}
-			}
-			Log.d("GIAEVER mode set", "Selection Mode: ${_uiState.value.selectionMode}")
-		}
-	}
-
-	fun selectItem(selectedItem: String, isArtist: Boolean) {
-		viewModelScope.launch {
-			if (isArtist) {
-				val artist = database.findAllArtists().find { it.name == selectedItem }
-				_uiState.update { currentState ->
-					currentState.copy(
-						selectedArtist = artist.toString(),
-						selectedItems = artist?.photos ?: emptyList(),
-						selectionMode = SelectionMode.ARTIST
-					)
-				}
-			} else {
-				val category = database.findAllCategories().find { it.name == selectedItem }
-				_uiState.update { currentState ->
-					currentState.copy(
-						selectedCategory = category.toString(),
-						selectedItems = category?.let { database.findPhotosByCategory(it) } ?: emptyList(),
-						selectionMode = SelectionMode.CATEGORY
-					)
-				}
-			}
-		}
-	}
-
-
-	private fun loadArtistItems() {
+	private fun loadInitialData() {
 		viewModelScope.launch {
 			val artists = database.findAllArtists()
-			_uiState.update { currentState ->
-				currentState.copy(artists = artists, artistItems = artists.map { ListItem.ArtistItem(it) })
-			}
-		}
-	}
-
-	private fun loadCategoryItems() {
-		viewModelScope.launch {
 			val categories = database.findAllCategories()
-			val categoryItems = categories.map { category ->
-				ListItem.CategoryItem(category, database.findPhotosByCategory(category))
-			}
 			_uiState.update { currentState ->
-				currentState.copy(categories = categories, categoryItems = categoryItems)
+				currentState.copy(artists = artists,
+					categories = categories,
+					artistItems = artists.map { ListItem.ArtistItem(it) },
+					categoryItems = categories.map {
+						ListItem.CategoryItem(
+							it, database.findPhotosByCategory(it)
+						)
+					})
 			}
 		}
 	}
 
-	private fun loadInitialData() {
-		loadArtistItems()
-		loadCategoryItems()
+	fun updateSelection(mode: SelectionMode, selectedItem: String? = null) {
+		viewModelScope.launch {
+			when (mode) {
+				SelectionMode.ARTIST -> {
+					selectedItem?.let {
+						val artist = database.findAllArtists().find { it.name == selectedItem }
+						_uiState.update { currentState ->
+							currentState.copy(
+								selectedArtist = artist?.name ?: "",
+								selectedItems = artist?.photos ?: emptyList(),
+								selectionMode = SelectionMode.ARTIST
+							)
+						}
+					}
+						?: _uiState.update { currentState -> currentState.copy(selectionMode = SelectionMode.ARTIST) }
+				}
+
+				SelectionMode.CATEGORY -> {
+					selectedItem?.let {
+						val category = database.findAllCategories().find { it.name == selectedItem }
+						_uiState.update { currentState ->
+							currentState.copy(
+								selectedCategory = category?.name ?: "",
+								selectedItems = database.findPhotosByCategory(
+									category ?: Category.Other
+								),
+								selectionMode = SelectionMode.CATEGORY
+							)
+						}
+					}
+						?: _uiState.update { currentState -> currentState.copy(selectionMode = SelectionMode.CATEGORY) }
+				}
+
+				else -> _uiState.update { currentState -> currentState.copy(selectionMode = SelectionMode.NONE) }
+			}
+		}
+	}
+
+	fun setSelectedItem(photo: Photo) {
+		viewModelScope.launch {
+			_uiState.update { currentState -> currentState.copy(selectedItem = photo) }
+		}
 	}
 
 	fun addToCart(photo: Photo) {
-		viewModelScope.launch {
-			_uiState.update { currentState ->
-				currentState.copy(cart = currentState.cart + photo)
-			}
-		}
-	}
-
-	fun setSelectedItem(selectedItem: Photo) {
-		viewModelScope.launch {
-			_uiState.update { currentState ->
-				currentState.copy(selectedItem = selectedItem)
-			}
-		}
-	}
-fun setSelectedArtist(selectedArtist: String) {
-		viewModelScope.launch {
-			_uiState.update { currentState ->
-				currentState.copy(selectedArtist = selectedArtist)
-			}
-		}
-	}
-	fun setSelectedCategory(selectedCategory: String) {
-		viewModelScope.launch {
-			_uiState.update { currentState ->
-				currentState.copy(selectedCategory = selectedCategory)
-			}
-		}
+		_uiState.update { currentState -> currentState.copy(cart = currentState.cart + photo) }
 	}
 }

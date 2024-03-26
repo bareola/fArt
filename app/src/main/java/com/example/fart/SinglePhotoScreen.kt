@@ -21,32 +21,27 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import com.example.fart.data.AppViewModel
 import com.example.fart.data.Photo
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SinglePhotoScreen(
-	photoId: Int,
 	viewModel: AppViewModel
-) {	// Assuming your ViewModel has a method to find a photo by ID
+) {
 	val uiState = viewModel.uiState.collectAsState()
 	val photo = uiState.value.selectedItem
 
 	Scaffold(topBar = {
-		TopAppBar(title = { Text(text = photo?.title ?: "Photo Details") }, navigationIcon = {
+		TopAppBar(title = { Text(text = photo.title) }, navigationIcon = {
 			IconButton(onClick = { /* Handle back action */ }) {
 				Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
 			}
 		})
 	}) { innerPadding ->
-		photo?.let {
-			PhotoDetailContent(photo = it, modifier = Modifier.padding(innerPadding))
-		} ?: run {
-			Text("Photo not found", modifier = Modifier.padding(innerPadding))
+		PhotoDetailContent(photo = photo, modifier = Modifier.padding(innerPadding))
 		}
 	}
-}
+
 
 @Composable
 fun PhotoDetailContent(photo: Photo, modifier: Modifier = Modifier) {

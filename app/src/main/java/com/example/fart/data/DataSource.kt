@@ -137,5 +137,8 @@ class Database {
 		}
 		return result
 	}
+	fun findPhotoById(photoId: Int): Photo {
+		return loadPhotos().find { it.id == photoId } ?: Photo(0, "", 0, emptyList(), 0.0)
+	}
 
 }
