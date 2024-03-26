@@ -16,6 +16,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
@@ -24,43 +25,37 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import com.example.fart.data.Category
-import com.example.fart.data.Database
+import com.example.fart.data.AppViewModel
 import com.example.fart.data.Photo
 
-val db = Database()
-
-
 @Composable
-fun PhotoScreen(selectedItem: String) {
-	Scaffold(topBar = { BasicAppBar(title = selectedItem) },
-		content = { paddingValues -> Photogrid(selectedItem, paddingValues) })
+fun PhotoScreen(viewModel: AppViewModel, navigateToSinglePhotoScreen: (Int) -> Unit) {
+	val uiState = viewModel.uiState.collectAsState().value
+	Scaffold(topBar = { BasicAppBar(title = "Photos") }, content = { paddingValues ->
+		PhotoGrid(photos = uiState.selectedItems, paddingValues = paddingValues)
+	})
 }
 
-@Composable
-fun Photogrid(selectedItem: String, paddingValues: PaddingValues) {
-	val photos = when (val category = db.findAllCategories().find { it.name == selectedItem }) {
-		null -> db.findPhotosByArtist(selectedItem)
-		else -> db.findPhotosByCategory(category)
-	}
 
+@Composable
+fun PhotoGrid(photos: List<Photo>, paddingValues: PaddingValues) {
 	LazyVerticalGrid(
 		columns = GridCells.Fixed(2),
 		contentPadding = paddingValues,
 		modifier = Modifier.fillMaxSize()
 	) {
 		items(photos.size) { index ->
-			val photo = photos[index]
-			val artistName = db.findAllArtists().find { artist -> artist.photos.contains(photo) }?.name ?: "Unknown"
-			PhotoCard(photo, artistName)
+			val photo =
+				photos[index]			// Assuming you have a way to determine the artist's name from the photo,
+			// otherwise, you can leave it as "Unknown" or modify according to your data structure.
+			PhotoCard(photo) // Update this according to your data structure
 		}
 	}
 }
 
 
-
 @Composable
-fun PhotoCard(photo: Photo, artistName: String) {
+fun PhotoCard(photo: Photo) {
 	val imageId = photo.resourceId
 
 	Card(
@@ -88,7 +83,7 @@ fun PhotoCard(photo: Photo, artistName: String) {
 
 			Column {
 				Text(text = photo.title)
-				Text(text = artistName)
+				Text(text = "Placeholder")
 				Text(text = photo.price.toString())
 			}
 		}

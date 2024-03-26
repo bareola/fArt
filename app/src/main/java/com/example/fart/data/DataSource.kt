@@ -1,6 +1,5 @@
 package com.example.fart.data
 
-import android.util.Log
 import androidx.annotation.DrawableRes
 import com.example.fart.R
 
@@ -21,7 +20,16 @@ sealed class Category(val name: String, @DrawableRes val picture: Int) {
 
 sealed class ListItem {
 	data class ArtistItem(val artist: Artist) : ListItem()
-	data class CategoryItem(val category: Category, val photos: List<Photo>) : ListItem() {}
+	data class CategoryItem(val category: Category, val photos: List<Photo>) : ListItem() {
+
+	}
+
+	fun name(): String {
+		return when (this) {
+			is ArtistItem -> artist.name
+			is CategoryItem -> category.name
+		}
+	}
 }
 
 data class Artist(
@@ -121,14 +129,12 @@ class Database {
 	}
 
 	fun findCategoriesWithPhotos(): List<ListItem.CategoryItem> {
-		Log.d("Debug", "findCategoriesWithPhotos called")
 		val allPhotos = loadPhotos()
 		val categoriesWithPhotos = allPhotos.flatMap { it.categories }.distinct()
 		val result = categoriesWithPhotos.map { category ->
 			val photosInCategory = allPhotos.filter { it.categories.contains(category) }
 			ListItem.CategoryItem(category, photosInCategory)
 		}
-		Log.d("Debug", "findCategoriesWithPhotos result: $result")
 		return result
 	}
 

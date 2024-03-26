@@ -1,11 +1,8 @@
+package com.example.fart.data
+
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.fart.Screen
-import com.example.fart.data.AppUiState
-import com.example.fart.data.Database
-import com.example.fart.data.ItemCardData
-import com.example.fart.data.ListItem
-import com.example.fart.data.Photo
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -15,58 +12,110 @@ import kotlinx.coroutines.launch
 class AppViewModel(private val database: Database = Database()) : ViewModel() {
 	private val _uiState = MutableStateFlow(AppUiState())
 	val uiState: StateFlow<AppUiState> = _uiState.asStateFlow()
-	private val _currentScreen = MutableStateFlow<Screen>(Screen.MainScreen)
-	val currentScreen: StateFlow<Screen> = _currentScreen.asStateFlow()
 
-	fun loadArtistItems() {
+	init {
+		loadInitialData()
+	}
+
+	fun setSelectionMode(mode: SelectionMode) {
+		viewModelScope.launch {
+			_uiState.update { currentState ->
+				currentState.copy(selectionMode = mode)
+
+			}
+			when (mode) {
+				SelectionMode.ARTIST -> {
+					loadArtistItems()
+
+				}
+				SelectionMode.CATEGORY -> {
+					loadCategoryItems()
+
+				}
+				else -> {Log.d("GIAEVER", "None")}
+			}
+			Log.d("GIAEVER mode set", "Selection Mode: ${_uiState.value.selectionMode}")
+		}
+	}
+
+	fun selectItem(selectedItem: String, isArtist: Boolean) {
+		viewModelScope.launch {
+			if (isArtist) {
+				val artist = database.findAllArtists().find { it.name == selectedItem }
+				_uiState.update { currentState ->
+					currentState.copy(
+						selectedArtist = artist.toString(),
+						selectedItems = artist?.photos ?: emptyList(),
+						selectionMode = SelectionMode.ARTIST
+					)
+				}
+			} else {
+				val category = database.findAllCategories().find { it.name == selectedItem }
+				_uiState.update { currentState ->
+					currentState.copy(
+						selectedCategory = category.toString(),
+						selectedItems = category?.let { database.findPhotosByCategory(it) } ?: emptyList(),
+						selectionMode = SelectionMode.CATEGORY
+					)
+				}
+			}
+		}
+	}
+
+
+	private fun loadArtistItems() {
 		viewModelScope.launch {
 			val artists = database.findAllArtists()
 			_uiState.update { currentState ->
-				currentState.copy(artists = artists,
-					artistItems = artists.map { ListItem.ArtistItem(it) })
+				currentState.copy(artists = artists, artistItems = artists.map { ListItem.ArtistItem(it) })
 			}
 		}
 	}
 
-	fun loadCategoryItems() {
+	private fun loadCategoryItems() {
 		viewModelScope.launch {
-			val categoryItems = database.findCategoriesWithPhotos()
+			val categories = database.findAllCategories()
+			val categoryItems = categories.map { category ->
+				ListItem.CategoryItem(category, database.findPhotosByCategory(category))
+			}
 			_uiState.update { currentState ->
-				currentState.copy(categoryItems = categoryItems)
+				currentState.copy(categories = categories, categoryItems = categoryItems)
 			}
 		}
 	}
 
-	fun getCardData(item: ListItem): ItemCardData {
-		val name: String
-		val picture: Int
-		val photos: List<Photo>
+	private fun loadInitialData() {
+		loadArtistItems()
+		loadCategoryItems()
+	}
 
-		when (item) {
-			is ListItem.ArtistItem -> {
-				name = item.artist.name
-				picture = item.artist.picture
-				photos = item.artist.photos
-			}
-
-			is ListItem.CategoryItem -> {
-				name = item.category.name
-				picture = item.category.picture
-				photos = item.photos
+	fun addToCart(photo: Photo) {
+		viewModelScope.launch {
+			_uiState.update { currentState ->
+				currentState.copy(cart = currentState.cart + photo)
 			}
 		}
-
-		return ItemCardData(name, picture, photos)
 	}
 
-	fun navigateToArtistScreen() {
-		_currentScreen.value = Screen.SelectScreen("artist")
+	fun setSelectedItem(selectedItem: Photo) {
+		viewModelScope.launch {
+			_uiState.update { currentState ->
+				currentState.copy(selectedItem = selectedItem)
+			}
+		}
 	}
-
-	fun navigateToCategoryScreen() {
-		_currentScreen.value = Screen.SelectScreen("category")
+fun setSelectedArtist(selectedArtist: String) {
+		viewModelScope.launch {
+			_uiState.update { currentState ->
+				currentState.copy(selectedArtist = selectedArtist)
+			}
+		}
 	}
-	fun navigateToPhotoScreen(selectedItem: String) {
-		_currentScreen.value = Screen.PhotoScreen(selectedItem)
+	fun setSelectedCategory(selectedCategory: String) {
+		viewModelScope.launch {
+			_uiState.update { currentState ->
+				currentState.copy(selectedCategory = selectedCategory)
+			}
+		}
 	}
 }

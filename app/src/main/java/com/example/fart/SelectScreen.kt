@@ -20,13 +20,19 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.example.fart.data.AppViewModel
 import com.example.fart.data.ListItem
+import com.example.fart.data.Photo
 import com.example.fart.data.SelectionMode
 
 @Composable
 fun ItemCard(item: ListItem, onItemSelect: (String) -> Unit) {
 	Card(modifier = Modifier
 		.fillMaxWidth()
-		.clickable { onItemSelect(item.name()) }) {
+		.clickable {
+			when (item) {
+				is ListItem.ArtistItem -> onItemSelect(item.artist.name)
+				is ListItem.CategoryItem -> onItemSelect(item.category.name)
+			}
+		}) {
 		Row {
 			Image(
 				painter = painterResource(
@@ -42,7 +48,7 @@ fun ItemCard(item: ListItem, onItemSelect: (String) -> Unit) {
 					.padding(4.dp)
 			)
 			Column {
-				Text(text = item.name())				// Update this part to handle photos for both ArtistItem and CategoryItem
+				Text(text = item.name())
 				val photos = when (item) {
 					is ListItem.ArtistItem -> item.artist.photos
 					is ListItem.CategoryItem -> item.photos
@@ -58,9 +64,7 @@ fun ItemCard(item: ListItem, onItemSelect: (String) -> Unit) {
 
 @Composable
 fun SelectList(
-	items: List<ListItem>,
-	onItemSelect: (String) -> Unit,
-	paddingValues: PaddingValues
+	items: List<ListItem>, onItemSelect: (String) -> Unit, paddingValues: PaddingValues
 ) {
 	Column(
 		modifier = Modifier
@@ -75,30 +79,35 @@ fun SelectList(
 
 
 @Composable
-fun SelectScreen(navigateToPhotoScreen: (String) -> Unit, appViewModel: AppViewModel) {
-	val uiState by appViewModel.uiState.collectAsState()
-
+fun SelectScreen(navigateToPhotoScreen: (String) -> Unit, viewModel: AppViewModel) {
+	val uiState by viewModel.uiState.collectAsState()
 	Scaffold(topBar = {
 		BasicAppBar(
 			title = when (uiState.selectionMode) {
 				SelectionMode.ARTIST -> "Select Artist"
 				SelectionMode.CATEGORY -> "Select Category"
-				else -> "Selection"
+				else -> "Neither artist or category selected"
 			}
 		)
 	}, content = { paddingValues ->
 		when (uiState.selectionMode) {
 			SelectionMode.ARTIST -> SelectList(
+
 				items = uiState.artistItems,
-				onItemSelect = navigateToPhotoScreen,
-				paddingValues = PaddingValues(all = 8.dp)
+				onItemSelect = { selectedItem ->
+					viewModel.setSelectedArtist(selectedItem)
+					navigateToPhotoScreen(selectedItem)
+				},
+				paddingValues = paddingValues
 			)
 
-			SelectionMode.CATEGORY -> Text(text = "Select Category")
-				SelectList(
+			SelectionMode.CATEGORY -> SelectList(
 				items = uiState.categoryItems,
-				onItemSelect = navigateToPhotoScreen,
-				paddingValues = PaddingValues(all = 8.dp)
+				onItemSelect = { selectedItem ->
+					viewModel.setSelectedArtist(selectedItem)
+					navigateToPhotoScreen(selectedItem)
+				},
+				paddingValues = paddingValues
 			)
 
 			else -> Text("Please select a mode from the main menu")

@@ -1,9 +1,10 @@
 package com.example.fart
 
-import AppViewModel
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.fart.data.AppViewModel
 import com.example.fart.ui.theme.FArtTheme
 
 class MainActivity : ComponentActivity() {
@@ -11,8 +12,8 @@ class MainActivity : ComponentActivity() {
 		super.onCreate(savedInstanceState)
 		setContent {
 			FArtTheme {
-				val appViewModel = AppViewModel()
-				AppNavigator(appViewModel)
+				val viewModel: AppViewModel = viewModel()
+				AppNavigator(viewModel = viewModel)
 
 			}
 		}

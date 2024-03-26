@@ -1,15 +1,16 @@
 package com.example.fart.data
-
-data class AppUiState(
-	val title: String = "",
-	var artists: List<Artist> = emptyList(),
-	val categories: List<String> = emptyList(),
-	val categoryItems: List<ListItem> = emptyList(),
-	val artistItems: List<ListItem> = emptyList(),
-	val selectedArtist: Artist? = null,
-	val selectedCategory: String? = null,
-	val cart: List<Photo> = emptyList()
-) {
-
-
+enum class SelectionMode {
+	ARTIST, CATEGORY, NONE
 }
+data class AppUiState(
+	val artists: List<Artist> = emptyList(),
+	val artistItems: List<ListItem.ArtistItem> = emptyList(),
+	val categories: List<Category> = emptyList(),
+	val categoryItems: List<ListItem.CategoryItem> = emptyList(),
+	val selectedItems: List<Photo> = emptyList(),
+	val selectedArtist: String = "",
+	val selectedCategory: String = "",
+	val cart: List<Photo> = emptyList(),
+	var selectionMode: SelectionMode = SelectionMode.NONE,
+	var selectedItem: Photo = Photo(0, "", 0, emptyList(), 0.0)
+)
