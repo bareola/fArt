@@ -1,11 +1,15 @@
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.fart.data.AppUiState
+import com.example.fart.data.CartItem
 import com.example.fart.data.Category
 import com.example.fart.data.Database
+import com.example.fart.data.Frame
+import com.example.fart.data.Framewidth
 import com.example.fart.data.ListItem
 import com.example.fart.data.Photo
 import com.example.fart.data.SelectionMode
+import com.example.fart.data.Size
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -81,7 +85,40 @@ class AppViewModel(private val database: Database = Database()) : ViewModel() {
 		}
 	}
 
-	fun addToCart(photo: Photo) {
-		_uiState.update { currentState -> currentState.copy(cart = currentState.cart + photo) }
+	fun setSelectedSize(size: Size) {
+		_uiState.update { currentState -> currentState.copy(selectedSize = size) }
+	}
+
+	fun setSelectedFrame(frame: Frame) {
+		_uiState.update { currentState -> currentState.copy(selectedFrame = frame) }
+	}
+
+	fun setSelectedFrameWidth(frameWidth: Framewidth) {
+		_uiState.update { currentState -> currentState.copy(selectedFrameWidth = frameWidth) }
+	}
+
+	fun setSelectedPhoto(photo: Photo) {
+		_uiState.update { currentState -> currentState.copy(selectedPhoto = photo) }
+	}
+
+	fun setExpandedSize(expanded: Boolean) {
+		_uiState.update { currentState -> currentState.copy(isSizeExpanded = expanded) }
+	}
+
+	fun setExpandedFrame(expanded: Boolean) {
+		_uiState.update { currentState -> currentState.copy(isFrameExpanded = expanded) }
+	}
+
+	fun setExpandedFrameWidth(expanded: Boolean) {
+		_uiState.update { currentState -> currentState.copy(isFrameWidthExpanded = expanded) }
+	}
+
+	fun addToCart() {
+		val cartItem = CartItem(
+			uiState.value.selectedPhoto!!,
+			uiState.value.selectedSize,
+			uiState.value.selectedFrame,
+			uiState.value.selectedFrameWidth
+		)
 	}
 }

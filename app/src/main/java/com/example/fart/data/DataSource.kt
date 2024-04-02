@@ -44,8 +44,36 @@ data class Photo(
 	val resourceId: Int,
 	val categories: List<Category>,
 	val price: Double
-)
+) {
+	fun artist(): String {
+		return Database().findAllArtists().find { it.photos.contains(this) }?.name ?: ""
+	}
 
+	fun categoriesJoined(): String {
+		return categories.joinToString { it.name }
+	}
+
+}
+
+
+enum class Size(val type: String, val price: Double) {
+	SMALL("Small",50.0), MEDIUM("Medium",150.0), LARGE("Large",300.0)
+}
+
+enum class Frame(val type: String, val price: Double) {
+	WOOD("Wood", 1.0), METAL("Metal", 1.5), PLASTIC("Plastic", 0.75)
+}
+
+enum class Framewidth(val material: String, val price: Double) {
+	SMALL("1 cm", 15.0), MEDIUM("2 cm", 10.0), LARGE("3 cm", 0.0)
+}
+
+data class CartItem(
+	val photo: Photo,
+	val size: Size,
+	val frame: Frame,
+	val frameWidth: Framewidth
+)
 data class ItemCardData(
 	val name: String, val picture: Int, val photos: List<Photo>
 )
@@ -103,7 +131,7 @@ class Database {
 				), Photo(
 					10,
 					"Gavelen Windmillpark",
-					R.drawable.havoeysund,
+					R.drawable.windmills,
 					listOf(Category.Nature, Category.Travel),
 					100.0
 				)
@@ -137,8 +165,10 @@ class Database {
 		}
 		return result
 	}
+
 	fun findPhotoById(photoId: Int): Photo {
 		return loadPhotos().find { it.id == photoId } ?: Photo(0, "", 0, emptyList(), 0.0)
 	}
+
 
 }
