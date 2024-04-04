@@ -29,7 +29,6 @@ import com.example.fart.data.AppViewModel
 @Composable
 fun CheckoutScreen(viewModel: AppViewModel, navController: NavController) {
 	val uiState = viewModel.uiState.collectAsState()
-	val context = LocalContext.current
 	val openDialog = remember { mutableStateOf(false) }
 
 	Scaffold {
@@ -37,21 +36,21 @@ fun CheckoutScreen(viewModel: AppViewModel, navController: NavController) {
 			Text(text = "Order Summary", style = MaterialTheme.typography.headlineMedium)
 			LazyColumn {
 				items(uiState.value.cart) { item ->
-					// Display each cart item with title and total price
 					Text("${item.photo.title} - $${item.price}", style = MaterialTheme.typography.bodySmall)
 				}
 			}
 
 			Spacer(modifier = Modifier.height(16.dp))
 
-			// Faux payment information
 			Card(modifier = Modifier.fillMaxWidth()) {
 				Column(modifier = Modifier.padding(16.dp)) {
 					Text(text = "Payment Method", style = MaterialTheme.typography.bodyLarge)
 					Text(
-						text = "Visa **** **** **** 1234",
+						text = "Visa: **** **** **** 1234",
 						style = MaterialTheme.typography.bodySmall
 					)
+					Text(text = "Expiration: 01/23", style = MaterialTheme.typography.bodySmall)
+					Text(text = "CVC: 123", style = MaterialTheme.typography.bodySmall)
 				}
 			}
 
