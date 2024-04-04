@@ -57,15 +57,36 @@ data class Photo(
 
 
 enum class Size(val type: String, val price: Double) {
-	SMALL("Small",50.0), MEDIUM("Medium",150.0), LARGE("Large",300.0)
+	SMALL("Small", 100.0),
+	MEDIUM("Medium", 150.0),
+	LARGE("Large", 200.0);
+
+	companion object {
+		fun fromType(type: String): Size? {
+			return entries.firstOrNull { it.type.equals(type, ignoreCase = true) }
+		}
+	}
 }
+
 
 enum class Frame(val type: String, val price: Double) {
-	WOOD("Wood", 1.0), METAL("Metal", 1.5), PLASTIC("Plastic", 0.75)
+	PLASTIC("Plastic", 0.75), WOOD("Wood", 1.0), METAL("Metal", 1.25);
+
+	companion object {
+		fun fromType(type: String): Frame? {
+			return entries.firstOrNull { it.type.equals(type, ignoreCase = true) }
+		}
+	}
 }
 
-enum class Framewidth(val material: String, val price: Double) {
-	SMALL("1 cm", 15.0), MEDIUM("2 cm", 10.0), LARGE("3 cm", 0.0)
+enum class Framewidth(val size: String, val price: Double) {
+	SMALL("1 cm", 0.9), MEDIUM("2 cm", 1.0), LARGE("3 cm", 1.1);
+
+	companion object {
+		fun fromSize(material: String): Framewidth? {
+			return entries.firstOrNull { it.size.equals(material, ignoreCase = true) }
+		}
+	}
 }
 
 data class CartItem(
@@ -74,6 +95,7 @@ data class CartItem(
 	val frame: Frame,
 	val frameWidth: Framewidth
 )
+
 data class ItemCardData(
 	val name: String, val picture: Int, val photos: List<Photo>
 )

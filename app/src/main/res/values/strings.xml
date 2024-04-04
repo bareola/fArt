@@ -10,7 +10,10 @@
     <string name="most_expensive_photo">Most expensive photo:</string>
     <string name="featured_photo">Featured photo:</string>
     <string name="photo_details">About the photo:</string>
-    <string name="photo_details_body">Photo by %s. The current asking price is $%s.</string>
+    <string name="photo_details_body">Photo by %s. The base price is $%s.</string>
     <string name="photo_details_categories">Category: %s</string>
     <string name="photo_details_frame">Frame choice:</string>
+    <string name="size">Size:</string>
+    <string name="frame_material">Frame material:</string>
+    <string name="frame_width">Frame width:</string>
 </resources>
