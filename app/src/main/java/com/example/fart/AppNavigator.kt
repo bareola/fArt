@@ -1,59 +1,55 @@
 package com.example.fart
 
-import AppViewModel
-import SinglePhotoScreen
+import com.example.fart.data.AppViewModel
 import androidx.compose.runtime.Composable
-import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
+import androidx.navigation.NavHostController
 
 enum class Screen(val route: String) {
-	Main("MainScreen"), Select("SelectScreen"), Photolist("PhotoScreen"), Singlephoto("SinglePhotoScreen");
-
-	fun createRoute(item: String): String {
-		return route.replace("{item}", item)
-	}
+	Main("MainScreen"),
+	Select("SelectScreen"),
+	Photolist("PhotoScreen"),
+	Singlephoto("SinglePhotoScreen"),
+	Checkout("CheckoutScreen")
 }
 
 @Composable
-fun AppNavigator(
-	viewModel: AppViewModel, navController: NavHostController = rememberNavController()
-) {
+fun AppNavigator(viewModel: AppViewModel) {
+	val navController: NavHostController = rememberNavController()
 
-	NavHost(
-		navController = navController, startDestination = Screen.Main.name
-	) {
+	NavHost(navController = navController, startDestination = Screen.Main.route) {
 
-		//Main Screen
-		composable(Screen.Main.name) {
-			MainScreen(
-				navigateToSelectScreen = { navController.navigate(Screen.Select.name) }, viewModel
-			)
+		// Main Screen
+		composable(Screen.Main.route) {
+			MainScreen(navController = navController, navigateToSelectScreen = {
+				navController.navigate(Screen.Select.route)
+			}, appViewModel = viewModel)
 		}
 
-		//Select Screen
-		composable(Screen.Select.name) {
-			SelectScreen(
-				navigateToPhotoScreen = { navController.navigate(Screen.Photolist.name) }, viewModel
-			)
+		// Select Screen
+		composable(Screen.Select.route) {
+			SelectScreen(navigateToPhotoScreen = {
+				navController.navigate(Screen.Photolist.route)
+			}, viewModel = viewModel, navController = navController)
 		}
 
-		//Photo Screen
-		composable(Screen.Photolist.name) {
-			PhotoScreen(
-				navigateToSinglePhotoScreen = { navController.navigate(Screen.Singlephoto.name) },
-				viewModel = viewModel
-			)
+		// Photo Screen
+		composable(Screen.Photolist.route) {
+			PhotoScreen(navigateToSinglePhotoScreen = {
+				navController.navigate(Screen.Singlephoto.route)
+			}, viewModel = viewModel, navController = navController)
 		}
 
-		//Single Photo Screen
-		composable(
-			Screen.Singlephoto.name) {
-			SinglePhotoScreen(
-				viewModel = viewModel
-			)
+		// Single Photo Screen
+		composable(Screen.Singlephoto.route) {
+			SinglePhotoScreen(viewModel = viewModel, navController = navController)
 		}
+		// Checkout Screen
+		composable(Screen.Checkout.route) {
+			CheckoutScreen(viewModel = viewModel, navController = navController)
+	}
+
 	}
 }

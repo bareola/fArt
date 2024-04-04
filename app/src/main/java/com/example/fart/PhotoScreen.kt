@@ -1,6 +1,6 @@
 package com.example.fart
 
-import AppViewModel
+import com.example.fart.data.AppViewModel
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -27,13 +27,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.example.fart.data.AppUiState
 import com.example.fart.data.Photo
 
 @Composable
-fun PhotoScreen(viewModel: AppViewModel, navigateToSinglePhotoScreen: (Int) -> Unit = {}) {
+fun PhotoScreen(viewModel: AppViewModel, navController: NavController, navigateToSinglePhotoScreen: (Int) -> Unit = {}) {
 	val uiState = viewModel.uiState.collectAsState().value
-	Scaffold(topBar = { BasicAppBar(title = "Photos") }, content = { paddingValues ->
+	Scaffold(topBar = { CustomAppBar(title = "Photos", navController = navController) }, content = { paddingValues ->
 		PhotoGrid(uiState = uiState, paddingValues = paddingValues, navigateToSinglePhotoScreen = navigateToSinglePhotoScreen, viewModel = viewModel)
 	})
 }

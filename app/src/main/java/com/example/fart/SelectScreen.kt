@@ -1,6 +1,6 @@
 package com.example.fart
 
-import AppViewModel
+import com.example.fart.data.AppViewModel
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -19,6 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.example.fart.data.AppUiState
 import com.example.fart.data.ListItem
 import com.example.fart.data.SelectionMode
@@ -79,10 +80,10 @@ fun SelectList(
 
 
 @Composable
-fun SelectScreen(navigateToPhotoScreen: (String) -> Unit, viewModel: AppViewModel) {
+fun SelectScreen(navigateToPhotoScreen: (String) -> Unit, viewModel: AppViewModel, navController: NavController) {
 	val uiState by viewModel.uiState.collectAsState()
 	Scaffold(topBar = {
-		BasicAppBar(title = getSelectScreenTitle(uiState.selectionMode))
+		CustomAppBar(title = getSelectScreenTitle(uiState.selectionMode), navController = navController)
 	}, content = { paddingValues ->
 		SelectList(
 			items = getItemsForSelectionMode(uiState), onItemSelect = { selectedItem ->

@@ -1,5 +1,7 @@
 package com.example.fart.data
 
+import androidx.compose.runtime.mutableStateListOf
+
 enum class SelectionMode {
 	ARTIST, CATEGORY, NONE
 }
@@ -12,7 +14,7 @@ data class AppUiState(
 	val selectedItems: List<Photo> = emptyList(),
 	val selectedArtist: String = "",
 	val selectedCategory: String = "",
-	val cart: List<Photo> = emptyList(),
+	var cart: List<CartItem> = mutableStateListOf(),
 	var selectionMode: SelectionMode = SelectionMode.NONE,
 	var selectedItem: Photo = Photo(0, "", 0, emptyList(), 0.0),
 	val selectedSize: Size = Size.MEDIUM,

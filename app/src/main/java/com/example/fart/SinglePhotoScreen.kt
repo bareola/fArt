@@ -1,3 +1,6 @@
+package com.example.fart
+
+import com.example.fart.data.AppViewModel
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -10,18 +13,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Divider
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
@@ -30,10 +28,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.fart.R
-import com.example.fart.data.Database
+import androidx.navigation.NavController
 import com.example.fart.data.Frame
 import com.example.fart.data.Framewidth
 import com.example.fart.data.Photo
@@ -41,9 +37,7 @@ import com.example.fart.data.Size
 
 @Composable
 fun RadioButtonGroup(
-	options: List<Pair<String, String>>,
-	selectedOption: String,
-	onOptionSelected: (String) -> Unit
+	options: List<Pair<String, String>>, selectedOption: String, onOptionSelected: (String) -> Unit
 ) {
 	Column {
 		options.forEach { (displayString, type) ->
@@ -51,10 +45,7 @@ fun RadioButtonGroup(
 				Modifier
 					.padding(8.dp)
 					.clickable { onOptionSelected(type) }) {
-				RadioButton(
-					selected = type == selectedOption,
-					onClick = { onOptionSelected(type) }
-				)
+				RadioButton(selected = type == selectedOption, onClick = { onOptionSelected(type) })
 				Text(
 					text = displayString,
 					style = MaterialTheme.typography.bodySmall.merge(),
@@ -65,15 +56,14 @@ fun RadioButtonGroup(
 	}
 }
 
-
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FrameChoiceRadioButton(viewModel: AppViewModel, onSelected: () -> Unit) {
+fun FrameChoiceRadioButton(viewModel: AppViewModel) {
 	val uiState = viewModel.uiState.collectAsState()
 	Column {
 
 		Card(
-			border = BorderStroke(1.dp, Color.Gray), modifier = Modifier
+			border = BorderStroke(1.dp, Color.Gray),
+			modifier = Modifier
 				.fillMaxWidth()
 				.padding(dimensionResource(id = R.dimen.padding_small))
 		) {
@@ -82,10 +72,9 @@ fun FrameChoiceRadioButton(viewModel: AppViewModel, onSelected: () -> Unit) {
 					dimensionResource(id = R.dimen.padding_small)
 				)
 			)
-			RadioButtonGroup(
-				options = Size.entries.map { size ->
-					"${size.type} - $${size.price}" to size.type
-				},
+			RadioButtonGroup(options = Size.entries.map { size ->
+				"${size.type} - $${size.price}" to size.type
+			},
 				selectedOption = uiState.value.selectedSize.type,
 				onOptionSelected = { selectedType ->
 					Size.fromType(selectedType)?.let {
@@ -95,11 +84,10 @@ fun FrameChoiceRadioButton(viewModel: AppViewModel, onSelected: () -> Unit) {
 		}
 		Card {
 			Text(text = stringResource(id = R.string.frame_material))
-			RadioButtonGroup(
-				options = Frame.entries.map { type ->
-					"${type.type} - $${(type.price * uiState.value.selectedSize.price) - uiState.value.selectedSize.price }" to type.type
+			RadioButtonGroup(options = Frame.entries.map { type ->
+				"${type.type} - $${(type.price * uiState.value.selectedSize.price) - uiState.value.selectedSize.price}" to type.type
 
-				},
+			},
 				selectedOption = uiState.value.selectedFrame.type,
 				onOptionSelected = { selectedType ->
 					Frame.fromType(selectedType)?.let {
@@ -109,10 +97,9 @@ fun FrameChoiceRadioButton(viewModel: AppViewModel, onSelected: () -> Unit) {
 		}
 		Card {
 			Text(text = stringResource(id = R.string.frame_width))
-			RadioButtonGroup(
-				options = Framewidth.entries.map { size ->
-					"${size.size} - $${size.price}" to size.size
-				},
+			RadioButtonGroup(options = Framewidth.entries.map { size ->
+				"${size.size} - $${size.price}" to size.size
+			},
 				selectedOption = uiState.value.selectedFrameWidth.size,
 				onOptionSelected = { selectedType ->
 					Framewidth.fromSize(selectedType)?.let {
@@ -120,26 +107,25 @@ fun FrameChoiceRadioButton(viewModel: AppViewModel, onSelected: () -> Unit) {
 					}
 				})
 		}
+
 	}
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SinglePhotoScreen(
-	viewModel: AppViewModel
+	viewModel: AppViewModel, navController: NavController
 ) {
 	val uiState = viewModel.uiState.collectAsState()
 	val photo = uiState.value.selectedItem
 
 	Scaffold(topBar = {
-		TopAppBar(title = { Text(text = photo.title) }, navigationIcon = {
-			IconButton(onClick = { }) {
-				Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
-			}
-		})
+		CustomAppBar(navController = navController, title = photo.title)
 	}) { innerPadding ->
 		PhotoDetailContent(
-			photo = photo, modifier = Modifier.padding(innerPadding), viewModel = viewModel
+			photo = photo,
+			modifier = Modifier.padding(innerPadding),
+			viewModel = viewModel,
+			navController = navController
 		)
 	}
 }
@@ -149,14 +135,15 @@ fun SinglePhotoScreen(
 fun PhotoDetailContent(
 	photo: Photo,
 	modifier: Modifier = Modifier,
-	viewModel: AppViewModel
+	viewModel: AppViewModel,
+	navController: NavController
 ) {
-	LazyColumn( // Use LazyColumn to enable vertical scrolling
+	LazyColumn(
 		modifier = modifier
 			.fillMaxSize()
 			.padding(16.dp)
 	) {
-		item { // Each component in the LazyColumn is an item
+		item {
 			Image(
 				painter = painterResource(id = photo.resourceId),
 				contentDescription = photo.title,
@@ -169,7 +156,7 @@ fun PhotoDetailContent(
 		}
 		item {
 			Card {
-				Column(Modifier.padding(16.dp)) { // Wrap Card content in a Column for proper spacing
+				Column(Modifier.padding(16.dp)) {
 					Text(
 						text = stringResource(id = R.string.photo_details),
 						style = MaterialTheme.typography.headlineSmall
@@ -193,19 +180,40 @@ fun PhotoDetailContent(
 						text = stringResource(id = R.string.photo_details_frame),
 						style = MaterialTheme.typography.headlineSmall
 					)
-					FrameChoiceRadioButton(viewModel = viewModel, onSelected = {})
+					FrameChoiceRadioButton(viewModel = viewModel)
+
+					Button(
+						onClick = {
+							viewModel.addToCart(photo)
+							navController.navigate(Screen.Main.route) {
+								popUpTo(Screen.Main.route) {
+									inclusive = true
+								}
+							}
+
+						},
+						modifier = Modifier
+							.fillMaxWidth()
+							.padding(dimensionResource(R.dimen.padding_large))
+					) {
+						Text("Add to Cart")
+					}
+					Button(
+						onClick = {
+							navController.navigate(Screen.Main.route) {
+								popUpTo(navController.graph.startDestinationId) {
+									inclusive = true
+								}
+							}
+						},
+						modifier = Modifier
+							.fillMaxWidth()
+							.padding(dimensionResource(R.dimen.padding_large))
+					) {
+						Text("Go Home")
+					}
 				}
 			}
 		}
 	}
-}
-
-
-@Preview
-@Composable
-fun SinglePhotoScreenPreview() {
-	val viewModel = AppViewModel()
-	val db = Database().loadPhotos().first()
-	viewModel.setSelectedItem(db)
-	SinglePhotoScreen(viewModel = viewModel)
 }

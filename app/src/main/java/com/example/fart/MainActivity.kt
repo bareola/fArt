@@ -1,6 +1,6 @@
 package com.example.fart
 
-import AppViewModel
+import com.example.fart.data.AppViewModel
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent

@@ -1,15 +1,9 @@
+package com.example.fart.data
+
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.toMutableStateList
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.fart.data.AppUiState
-import com.example.fart.data.CartItem
-import com.example.fart.data.Category
-import com.example.fart.data.Database
-import com.example.fart.data.Frame
-import com.example.fart.data.Framewidth
-import com.example.fart.data.ListItem
-import com.example.fart.data.Photo
-import com.example.fart.data.SelectionMode
-import com.example.fart.data.Size
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -100,25 +94,26 @@ class AppViewModel(private val database: Database = Database()) : ViewModel() {
 	fun setSelectedPhoto(photo: Photo) {
 		_uiState.update { currentState -> currentState.copy(selectedPhoto = photo) }
 	}
+	fun addToCart(photo: Photo) {
+		val currentSize = uiState.value.selectedSize
+		val currentFrame = uiState.value.selectedFrame
+		val currentFrameWidth = uiState.value.selectedFrameWidth
 
-	fun setExpandedSize(expanded: Boolean) {
-		_uiState.update { currentState -> currentState.copy(isSizeExpanded = expanded) }
-	}
-
-	fun setExpandedFrame(expanded: Boolean) {
-		_uiState.update { currentState -> currentState.copy(isFrameExpanded = expanded) }
-	}
-
-	fun setExpandedFrameWidth(expanded: Boolean) {
-		_uiState.update { currentState -> currentState.copy(isFrameWidthExpanded = expanded) }
-	}
-
-	fun addToCart() {
-		val cartItem = CartItem(
-			uiState.value.selectedPhoto!!,
-			uiState.value.selectedSize,
-			uiState.value.selectedFrame,
-			uiState.value.selectedFrameWidth
+		val cartItem = CartItem(photo, currentSize, currentFrame, currentFrameWidth)
+		_uiState.value = uiState.value.copy(
+			cart = (_uiState.value.cart + cartItem).toMutableStateList()
 		)
 	}
+	fun removeFromCart(cartItem: CartItem) {
+		_uiState.update { currentState ->
+			currentState.copy(cart = currentState.cart.toMutableList().also { it.remove(cartItem) })
+		}
+	}
+	fun clearCart() {
+		_uiState.update { currentState ->
+			currentState.copy(cart = mutableStateListOf())
+		}
+	}
+
+
 }

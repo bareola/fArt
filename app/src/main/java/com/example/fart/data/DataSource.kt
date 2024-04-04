@@ -20,9 +20,7 @@ sealed class Category(val name: String, @DrawableRes val picture: Int) {
 
 sealed class ListItem {
 	data class ArtistItem(val artist: Artist) : ListItem()
-	data class CategoryItem(val category: Category, val photos: List<Photo>) : ListItem() {
-
-	}
+	data class CategoryItem(val category: Category, val photos: List<Photo>) : ListItem()
 
 	fun name(): String {
 		return when (this) {
@@ -34,9 +32,7 @@ sealed class ListItem {
 
 data class Artist(
 	val name: String, val age: Int, @DrawableRes val picture: Int, val photos: List<Photo>
-) {
-	fun numberOfPhotos(): Int = photos.size
-}
+)
 
 data class Photo(
 	val id: Int,
@@ -57,9 +53,7 @@ data class Photo(
 
 
 enum class Size(val type: String, val price: Double) {
-	SMALL("Small", 100.0),
-	MEDIUM("Medium", 150.0),
-	LARGE("Large", 200.0);
+	SMALL("Small", 100.0), MEDIUM("Medium", 150.0), LARGE("Large", 200.0);
 
 	companion object {
 		fun fromType(type: String): Size? {
@@ -90,15 +84,11 @@ enum class Framewidth(val size: String, val price: Double) {
 }
 
 data class CartItem(
-	val photo: Photo,
-	val size: Size,
-	val frame: Frame,
-	val frameWidth: Framewidth
-)
-
-data class ItemCardData(
-	val name: String, val picture: Int, val photos: List<Photo>
-)
+	val photo: Photo, val size: Size, val frame: Frame, val frameWidth: Framewidth
+) {
+	val price: Double
+		get() = photo.price + size.price + frame.price + frameWidth.price
+}
 
 class Database {
 	private val artists = listOf(
@@ -161,7 +151,7 @@ class Database {
 		)
 	)
 
-	fun loadPhotos(): List<Photo> = artists.flatMap { it.photos }
+	private fun loadPhotos(): List<Photo> = artists.flatMap { it.photos }
 
 	fun findAllArtists(): List<Artist> = artists
 
@@ -173,24 +163,4 @@ class Database {
 		val allPhotos = loadPhotos()
 		return allPhotos.filter { it.categories.contains(category) }
 	}
-
-	fun findPhotosByArtist(artistName: String): List<Photo> {
-		return findAllArtists().find { it.name == artistName }?.photos ?: emptyList()
-	}
-
-	fun findCategoriesWithPhotos(): List<ListItem.CategoryItem> {
-		val allPhotos = loadPhotos()
-		val categoriesWithPhotos = allPhotos.flatMap { it.categories }.distinct()
-		val result = categoriesWithPhotos.map { category ->
-			val photosInCategory = allPhotos.filter { it.categories.contains(category) }
-			ListItem.CategoryItem(category, photosInCategory)
-		}
-		return result
-	}
-
-	fun findPhotoById(photoId: Int): Photo {
-		return loadPhotos().find { it.id == photoId } ?: Photo(0, "", 0, emptyList(), 0.0)
-	}
-
-
 }
