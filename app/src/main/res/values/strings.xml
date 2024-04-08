@@ -17,4 +17,6 @@
     <string name="size">Size:</string>
     <string name="frame_material">Frame material:</string>
     <string name="frame_width">Frame width:</string>
+    <string name="payment_title">Payment confirmation</string>
+    <string name="payment_processed">Your payment has been processed!</string>
 </resources>

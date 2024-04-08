@@ -1,6 +1,5 @@
 package com.example.fart
 
-import com.example.fart.data.AppViewModel
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -14,7 +13,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
@@ -22,6 +23,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -30,84 +32,82 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.fart.data.AppViewModel
 import com.example.fart.data.Frame
 import com.example.fart.data.Framewidth
 import com.example.fart.data.Photo
 import com.example.fart.data.Size
 
+
+
 @Composable
-fun RadioButtonGroup(
-	options: List<Pair<String, String>>, selectedOption: String, onOptionSelected: (String) -> Unit
-) {
+fun FrameChoiceRadioButton(viewModel: AppViewModel) {
+	val uiState = viewModel.uiState.collectAsState()
+
+	val options = listOf(
+		Pair(R.string.size, Size.entries.map { it.type to "${it.type} - $${it.price}" }),
+		Pair(R.string.frame_material, Frame.entries.map { it.type to "${it.type} - $${(it.price * uiState.value.selectedSize.price) - uiState.value.selectedSize.price}" }),
+		Pair(R.string.frame_width, Framewidth.entries.map { it.size to "${it.size} - $${it.price}" })
+	)
+
 	Column {
-		options.forEach { (displayString, type) ->
-			Row(
-				Modifier
-					.padding(8.dp)
-					.clickable { onOptionSelected(type) }) {
-				RadioButton(selected = type == selectedOption, onClick = { onOptionSelected(type) })
-				Text(
-					text = displayString,
-					style = MaterialTheme.typography.bodySmall.merge(),
-					modifier = Modifier.padding(start = 8.dp)
-				)
-			}
+		options.forEach { (titleRes, entries) ->
+			SettingCard(
+				title = stringResource(id = titleRes),
+				entries = entries,
+				selectedOption = when (titleRes) {
+					R.string.size -> uiState.value.selectedSize.type
+					R.string.frame_material -> uiState.value.selectedFrame.type
+					R.string.frame_width -> uiState.value.selectedFrameWidth.size
+					else -> ""
+				},
+				onOptionSelected = { selectedType ->
+					when (titleRes) {
+						R.string.size -> Size.fromType(selectedType)?.let { viewModel.setSelectedSize(it) }
+						R.string.frame_material -> Frame.fromType(selectedType)?.let { viewModel.setSelectedFrame(it) }
+						R.string.frame_width -> Framewidth.fromSize(selectedType)?.let { viewModel.setSelectedFrameWidth(it) }
+					}
+				}
+			)
 		}
 	}
 }
 
 @Composable
-fun FrameChoiceRadioButton(viewModel: AppViewModel) {
-	val uiState = viewModel.uiState.collectAsState()
-	Column {
-
-		Card(
-			border = BorderStroke(1.dp, Color.Gray),
-			modifier = Modifier
-				.fillMaxWidth()
-				.padding(dimensionResource(id = R.dimen.padding_small))
-		) {
+fun SettingCard(title: String, entries: List<Pair<String, String>>, selectedOption: String, onOptionSelected: (String) -> Unit) {
+	Card(
+		border = BorderStroke(1.dp, Color.Gray),
+		modifier = Modifier
+			.fillMaxWidth()
+			.padding(vertical = 4.dp, horizontal = 8.dp)
+	) {
+		Column(modifier = Modifier.padding(8.dp)) {
 			Text(
-				text = stringResource(id = R.string.size), modifier = Modifier.padding(
-					dimensionResource(id = R.dimen.padding_small)
-				)
+				text = title,
+				style = MaterialTheme.typography.labelLarge,
+				modifier = Modifier.padding(bottom = 4.dp)
 			)
-			RadioButtonGroup(options = Size.entries.map { size ->
-				"${size.type} - $${size.price}" to size.type
-			},
-				selectedOption = uiState.value.selectedSize.type,
-				onOptionSelected = { selectedType ->
-					Size.fromType(selectedType)?.let {
-						viewModel.setSelectedSize(it)
-					}
-				})
+			RadioButtonGroup(entries, selectedOption, onOptionSelected)
 		}
-		Card {
-			Text(text = stringResource(id = R.string.frame_material))
-			RadioButtonGroup(options = Frame.entries.map { type ->
-				"${type.type} - $${(type.price * uiState.value.selectedSize.price) - uiState.value.selectedSize.price}" to type.type
+	}
+}
 
-			},
-				selectedOption = uiState.value.selectedFrame.type,
-				onOptionSelected = { selectedType ->
-					Frame.fromType(selectedType)?.let {
-						viewModel.setSelectedFrame(it)
-					}
-				})
+@Composable
+fun RadioButtonGroup(options: List<Pair<String, String>>, selectedOption: String, onOptionSelected: (String) -> Unit) {
+	options.forEach { (type, displayString) ->
+		Row(Modifier.clickable { onOptionSelected(type) }) {
+			RadioButton(
+				selected = type == selectedOption,
+				onClick = { onOptionSelected(type) }
+			)
+			Text(
+				text = displayString,
+				style = MaterialTheme.typography.bodySmall,
+				modifier = Modifier
+					.padding(start = 8.dp)
+					.align(Alignment.CenterVertically)
+			)
 		}
-		Card {
-			Text(text = stringResource(id = R.string.frame_width))
-			RadioButtonGroup(options = Framewidth.entries.map { size ->
-				"${size.size} - $${size.price}" to size.size
-			},
-				selectedOption = uiState.value.selectedFrameWidth.size,
-				onOptionSelected = { selectedType ->
-					Framewidth.fromSize(selectedType)?.let {
-						viewModel.setSelectedFrameWidth(it)
-					}
-				})
-		}
-
 	}
 }
 
@@ -141,7 +141,7 @@ fun PhotoDetailContent(
 	LazyColumn(
 		modifier = modifier
 			.fillMaxSize()
-			.padding(16.dp)
+			.padding(horizontal = 12.dp, vertical = 8.dp)
 	) {
 		item {
 			Image(
@@ -152,24 +152,25 @@ fun PhotoDetailContent(
 					.aspectRatio(1.5f),
 				contentScale = ContentScale.Crop
 			)
-			Spacer(modifier = Modifier.height(16.dp))
+			Spacer(modifier = Modifier.height(8.dp))
 		}
 		item {
-			Card {
-				Column(Modifier.padding(16.dp)) {
+			Card(
+				elevation = CardDefaults.cardElevation(dimensionResource(id = R.dimen.elevation_small)),
+				modifier = Modifier.fillMaxWidth()
+			) {
+				Column(Modifier.padding(12.dp)) {
 					Text(
 						text = stringResource(id = R.string.photo_details),
-						style = MaterialTheme.typography.headlineSmall
+						style = MaterialTheme.typography.titleMedium
 					)
 					Text(
-						text = stringResource(
-							id = R.string.photo_details_body, photo.artist(), photo.price
-						), style = MaterialTheme.typography.bodySmall
+						text = stringResource(id = R.string.photo_details_body, photo.artist(), photo.price),
+						style = MaterialTheme.typography.bodySmall
 					)
 					Text(
-						text = stringResource(
-							id = R.string.photo_details_categories, photo.categoriesJoined()
-						), style = MaterialTheme.typography.bodySmall
+						text = stringResource(id = R.string.photo_details_categories, photo.categoriesJoined()),
+						style = MaterialTheme.typography.bodySmall
 					)
 					Divider(
 						color = Color.Gray,
@@ -178,10 +179,9 @@ fun PhotoDetailContent(
 					)
 					Text(
 						text = stringResource(id = R.string.photo_details_frame),
-						style = MaterialTheme.typography.headlineSmall
+						style = MaterialTheme.typography.titleMedium
 					)
 					FrameChoiceRadioButton(viewModel = viewModel)
-
 					Button(
 						onClick = {
 							viewModel.addToCart(photo)
@@ -190,14 +190,13 @@ fun PhotoDetailContent(
 									inclusive = true
 								}
 							}
-
 						},
-						modifier = Modifier
-							.fillMaxWidth()
-							.padding(dimensionResource(R.dimen.padding_large))
+						modifier = Modifier.fillMaxWidth(),
+						elevation = ButtonDefaults.buttonElevation(0.dp)
 					) {
 						Text("Add to Cart")
 					}
+					Spacer(modifier = Modifier.height(4.dp))
 					Button(
 						onClick = {
 							navController.navigate(Screen.Main.route) {
@@ -206,9 +205,8 @@ fun PhotoDetailContent(
 								}
 							}
 						},
-						modifier = Modifier
-							.fillMaxWidth()
-							.padding(dimensionResource(R.dimen.padding_large))
+						modifier = Modifier.fillMaxWidth(),
+						elevation = ButtonDefaults.buttonElevation(0.dp)
 					) {
 						Text("Go Home")
 					}

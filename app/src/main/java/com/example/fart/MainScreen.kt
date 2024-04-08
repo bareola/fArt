@@ -2,12 +2,28 @@ package com.example.fart
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material3.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -17,7 +33,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -36,7 +51,7 @@ fun MainScreen(
 ) {
 	val uiState by appViewModel.uiState.collectAsState()
 
-	Column{
+	Column {
 		CustomAppBar(navController = navController, title = stringResource(R.string.app_name_full))
 		ChooseBasedOn(navigateToSelectScreen, appViewModel)
 		ShoppingCart(uiState.cart, removeFromCart = { cartItem ->
@@ -49,8 +64,15 @@ fun MainScreen(
 
 @Composable
 fun ChooseBasedOn(navigateToSelectScreen: (String) -> Unit, appViewModel: AppViewModel) {
-	Column(modifier = Modifier.padding(dimensionResource(R.dimen.padding_large))) {
-		Text(text = stringResource(id = R.string.choose_based_on), style = MaterialTheme.typography.bodyLarge)
+	Column(
+		modifier = Modifier
+			.padding(dimensionResource(R.dimen.padding_large))
+	) {
+		Text(
+			text = stringResource(id = R.string.choose_based_on),
+			style = MaterialTheme.typography.bodyLarge,
+			modifier = Modifier.align(Alignment.CenterHorizontally)
+		)
 		Row(modifier = Modifier.padding(top = 8.dp)) {
 			Button(onClick = {
 				appViewModel.updateSelection(SelectionMode.ARTIST)
@@ -72,47 +94,49 @@ fun ChooseBasedOn(navigateToSelectScreen: (String) -> Unit, appViewModel: AppVie
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CustomAppBar(navController: NavController, title: String) {
-	TopAppBar(
-		title = {
-			Box(modifier = Modifier.fillMaxWidth()) {
-				Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.align(Alignment.Center)) {
-					val logo: Painter = painterResource(id = R.drawable.logonotext)
-					Image(
-						painter = logo,
-						contentDescription = "Logo",
-						modifier = Modifier
-							.height(dimensionResource(R.dimen.icon))
-							.width(dimensionResource(R.dimen.icon))
-							.clip(RoundedCornerShape(50))
-					)
-					Text(
-						text = title,
-						textAlign = TextAlign.Center,
-						modifier = Modifier
-							.padding(horizontal = 50.dp),
-						style = MaterialTheme.typography.titleLarge
-					)
-				}
+	TopAppBar(title = {
+		Box(modifier = Modifier.fillMaxWidth()) {
+			Row(
+				verticalAlignment = Alignment.CenterVertically,
+				modifier = Modifier.align(Alignment.Center)
+			) {
+				val logo: Painter = painterResource(id = R.drawable.logonotext)
+				Image(
+					painter = logo,
+					contentDescription = "Logo",
+					modifier = Modifier
+						.height(dimensionResource(R.dimen.icon))
+						.width(dimensionResource(R.dimen.icon))
+						.clip(RoundedCornerShape(50))
+				)
+				Text(
+					text = title,
+					textAlign = TextAlign.Center,
+					modifier = Modifier.padding(horizontal = 50.dp),
+					style = MaterialTheme.typography.titleLarge
+				)
 			}
-		},
-		navigationIcon = {
-			if (navController.previousBackStackEntry != null) {
-				IconButton(onClick = { navController.navigateUp() }) {
-					Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
-				}
+		}
+	}, navigationIcon = {
+		if (navController.previousBackStackEntry != null) {
+			IconButton(onClick = { navController.navigateUp() }) {
+				Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
 			}
-		},
-		modifier = Modifier.fillMaxWidth(), colors = TopAppBarDefaults.topAppBarColors(
+		}
+	}, modifier = Modifier.fillMaxWidth(), colors = TopAppBarDefaults.topAppBarColors(
 		containerColor = MaterialTheme.colorScheme.primaryContainer,
 		titleContentColor = MaterialTheme.colorScheme.onSurface
-	))
+	)
+	)
 }
 
 @Composable
 fun ShoppingCart(cart: List<CartItem>, removeFromCart: (CartItem) -> Unit, onCheckout: () -> Unit) {
-	Column(modifier = Modifier
-		.fillMaxWidth()
-		.padding(16.dp)) {
+	Column(
+		modifier = Modifier
+			.fillMaxWidth()
+			.padding(dimensionResource(R.dimen.padding_large))
+	) {
 		Text(text = "Total Pictures: ${cart.size}", style = MaterialTheme.typography.bodyLarge)
 		val totalPrice = cart.sumOf { it.price }
 		Text(text = "Total Price: $$totalPrice", style = MaterialTheme.typography.bodyLarge)
@@ -125,7 +149,7 @@ fun ShoppingCart(cart: List<CartItem>, removeFromCart: (CartItem) -> Unit, onChe
 					.fillMaxWidth()
 					.padding(vertical = 8.dp),
 				border = BorderStroke(1.dp, Color.Gray),
-				shape = RoundedCornerShape(8.dp) // Slightly rounded corners for a subtle effect
+				shape = RoundedCornerShape(8.dp)
 			) {
 				Row(Modifier.padding(8.dp)) {
 					Image(
@@ -164,7 +188,8 @@ fun ShoppingCart(cart: List<CartItem>, removeFromCart: (CartItem) -> Unit, onChe
 						)
 					}
 					IconButton(
-						onClick = { removeFromCart(cartItem) }, modifier = Modifier.align(Alignment.Top)
+						onClick = { removeFromCart(cartItem) },
+						modifier = Modifier.align(Alignment.Top)
 					) {
 						Icon(Icons.Default.Delete, contentDescription = "Remove")
 					}
@@ -179,7 +204,7 @@ fun ShoppingCart(cart: List<CartItem>, removeFromCart: (CartItem) -> Unit, onChe
 			modifier = Modifier
 				.fillMaxWidth()
 				.padding(horizontal = 0.dp),
-			shape = RoundedCornerShape(4.dp) // Consistent rounded corners for buttons
+			shape = RoundedCornerShape(4.dp)
 		) {
 			Text("Checkout")
 		}
