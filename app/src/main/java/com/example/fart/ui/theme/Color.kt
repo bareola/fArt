@@ -1,4 +1,4 @@
-package com.example.compose
+package com.example.fart.ui.theme
 import androidx.compose.ui.graphics.Color
 
 val primaryLight = Color(0xFF86521A)
@@ -19,7 +19,7 @@ val errorContainerLight = Color(0xFFFFDAD4)
 val onErrorContainerLight = Color(0xFF3A0A04)
 val backgroundLight = Color(0xFFFFF8F5)
 val onBackgroundLight = Color(0xFF211A14)
-val surfaceLight = Color(0xFFFFF8F5)
+val surfaceLight = Color(0xFFFCEDDB)
 val onSurfaceLight = Color(0xFF211A14)
 val surfaceVariantLight = Color(0xFFF2DFD1)
 val onSurfaceVariantLight = Color(0xFF51443A)
