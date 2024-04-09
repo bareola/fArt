@@ -13,6 +13,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -118,7 +120,8 @@ fun ShoppingCartItem(cartItem: CartItem, removeFromCart: (CartItem) -> Unit) {
 	Card(
 		modifier = Modifier
 			.fillMaxWidth()
-			.padding(vertical = 8.dp),
+			.padding(vertical = 8.dp)
+			.background(MaterialTheme.colorScheme.background),
 		border = BorderStroke(1.dp, Color.Gray),
 		shape = RoundedCornerShape(8.dp)
 	) {
@@ -139,7 +142,7 @@ fun ShoppingCartItem(cartItem: CartItem, removeFromCart: (CartItem) -> Unit) {
 					.align(Alignment.CenterVertically)
 			) {
 				Text(cartItem.photo.title, style = MaterialTheme.typography.bodyLarge)
-				Text("Size: ${cartItem.size.name}", style = MaterialTheme.typography.bodySmall)
+				Text("Size: ${cartItem.size.type}", style = MaterialTheme.typography.bodySmall)
 				Text(
 					"Frame: ${cartItem.frame.type}", style = MaterialTheme.typography.bodySmall
 				)
@@ -159,50 +162,56 @@ fun ShoppingCartItem(cartItem: CartItem, removeFromCart: (CartItem) -> Unit) {
 
 @Composable
 fun ShoppingCart(cart: List<CartItem>, removeFromCart: (CartItem) -> Unit, onCheckout: () -> Unit) {
-	Column(
+	LazyColumn(
 		modifier = Modifier
-			.fillMaxWidth()
-			.padding(horizontal = 16.dp, vertical = 8.dp)
-			.alpha(if (cart.isEmpty()) 0.3f else 1f)
+			.fillMaxSize()
+			.padding(dimensionResource(id = R.dimen.padding_large))
+			.alpha(if (cart.isEmpty()) 0.35f else 1f)
 	) {
-		Text(
-			text = stringResource(id = R.string.shopping_cart),
-			style = MaterialTheme.typography.headlineMedium,
-			modifier = Modifier.align(Alignment.CenterHorizontally)
-		)
+		item {
+			Text(
+				text = stringResource(id = R.string.shopping_cart),
+				style = MaterialTheme.typography.headlineMedium,
+				textAlign = TextAlign.Center
+			)
+		}
+
 		if (cart.isEmpty()) {
-			Box(modifier = Modifier.fillMaxSize()) {
+			item {
 				Text(
 					text = stringResource(id = R.string.empty_cart),
-					style = MaterialTheme.typography.headlineMedium,
-					color = Color.Gray,
+					style = MaterialTheme.typography.headlineSmall,
+					textAlign = TextAlign.Center,
 					modifier = Modifier
-						.align(Alignment.Center)
 						.padding(dimensionResource(id = R.dimen.padding_large))
+						.fillMaxWidth()
 				)
+
 			}
 		} else {
-			Text("Total Pictures: ${cart.size}", style = MaterialTheme.typography.bodyLarge)
-			val totalPrice = cart.sumOf { it.price }
-			Text("Total Price: $$totalPrice", style = MaterialTheme.typography.bodyLarge)
+			item {
+				Text("Total Pictures: ${cart.size}", style = MaterialTheme.typography.bodyLarge)
+				val totalPrice = cart.sumOf { it.price }
+				Text("Total Price: $$totalPrice", style = MaterialTheme.typography.bodyLarge)
+				Spacer(modifier = Modifier.height(16.dp))
+			}
 
-			Spacer(modifier = Modifier.height(16.dp))
-
-			cart.forEach { cartItem ->
+			items(cart) { cartItem ->
 				ShoppingCartItem(cartItem, removeFromCart)
 			}
 
-			Spacer(modifier = Modifier.height(16.dp))
+			item {
+				Spacer(modifier = Modifier.height(16.dp))
 
-			Button(
-				onClick = onCheckout,
-				enabled = cart.isNotEmpty(),
-				modifier = Modifier.fillMaxWidth(),
-				shape = RoundedCornerShape(4.dp)
-			) {
-				Text("Checkout")
+				Button(
+					onClick = onCheckout,
+					enabled = cart.isNotEmpty(),
+					modifier = Modifier.fillMaxWidth(),
+					shape = RoundedCornerShape(4.dp)
+				) {
+					Text("Checkout")
+				}
 			}
-
 		}
 	}
 }

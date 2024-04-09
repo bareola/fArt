@@ -1,5 +1,6 @@
 package com.example.fart
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -22,14 +23,18 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.fart.data.AppUiState
 import com.example.fart.data.AppViewModel
 import com.example.fart.data.ListItem
 import com.example.fart.data.SelectionMode
+import com.example.fart.ui.theme.AppTheme
 
 @Composable
 fun ItemCard(item: ListItem, onItemSelect: (String) -> Unit) {
@@ -37,9 +42,10 @@ fun ItemCard(item: ListItem, onItemSelect: (String) -> Unit) {
 		modifier = Modifier
 			.fillMaxWidth()
 			.clickable(onClick = { onItemSelect(item.name()) })
-			.padding(vertical = dimensionResource(R.dimen.padding_small)),
+			.padding(dimensionResource(R.dimen.padding_small)),
 		shape = RoundedCornerShape(dimensionResource(R.dimen.card_rounded_corner)),
 		elevation = CardDefaults.cardElevation(dimensionResource(R.dimen.elevation_small)),
+		border = BorderStroke(1.dp, Color.Gray),
 		colors = CardDefaults.cardColors(
 			containerColor = MaterialTheme.colorScheme.surface,
 			contentColor = MaterialTheme.colorScheme.onSurface
@@ -88,9 +94,7 @@ fun ItemCard(item: ListItem, onItemSelect: (String) -> Unit) {
 
 @Composable
 fun SelectList(
-	items: List<ListItem>,
-	onItemSelect: (String) -> Unit,
-	paddingValues: PaddingValues
+	items: List<ListItem>, onItemSelect: (String) -> Unit, paddingValues: PaddingValues
 ) {
 	Column(
 		modifier = Modifier
@@ -106,15 +110,12 @@ fun SelectList(
 
 @Composable
 fun SelectScreen(
-	navigateToPhotoScreen: (String) -> Unit,
-	viewModel: AppViewModel,
-	navController: NavController
+	navigateToPhotoScreen: (String) -> Unit, viewModel: AppViewModel, navController: NavController
 ) {
 	val uiState by viewModel.uiState.collectAsState()
 	Scaffold(topBar = {
 		CustomAppBar(
-			title = getSelectScreenTitle(uiState.selectionMode),
-			navController = navController
+			title = getSelectScreenTitle(uiState.selectionMode), navController = navController
 		)
 	}, content = { paddingValues ->
 		SelectList(
@@ -136,6 +137,20 @@ fun getItemsForSelectionMode(uiState: AppUiState): List<ListItem> = when (uiStat
 	SelectionMode.ARTIST -> uiState.artistItems
 	SelectionMode.CATEGORY -> uiState.categoryItems
 	else -> emptyList()
+}
+
+@Preview
+@Composable
+fun SelectScreenPreview() {
+	val viewModel = AppViewModel()
+	viewModel.updateSelection(SelectionMode.ARTIST, "Artist 1")
+	AppTheme {
+		SelectScreen(
+			navigateToPhotoScreen = {},
+			viewModel = viewModel,
+			navController = NavController(LocalContext.current)
+		)
+	}
 }
 
 

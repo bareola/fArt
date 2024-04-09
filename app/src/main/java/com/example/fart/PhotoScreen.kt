@@ -28,11 +28,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.example.fart.data.AppUiState
 import com.example.fart.data.AppViewModel
+import com.example.fart.data.Database
 import com.example.fart.data.Photo
+import com.example.fart.data.SelectionMode
+import com.example.fart.ui.theme.AppTheme
 
 @Composable
 fun PhotoScreen(
@@ -41,7 +46,7 @@ fun PhotoScreen(
 	navigateToSinglePhotoScreen: (Int) -> Unit = {}
 ) {
 	val uiState = viewModel.uiState.collectAsState().value
-	Scaffold(topBar = { CustomAppBar(title = "Photos", navController = navController) },
+	Scaffold(topBar = { CustomAppBar(title = if (uiState.selectionMode == SelectionMode.ARTIST) {uiState.selectedArtist} else {uiState.selectedCategory}, navController = navController) },
 		content = { paddingValues ->
 			PhotoGrid(
 				uiState = uiState,
@@ -83,9 +88,7 @@ fun PhotoGrid(
 
 @Composable
 fun PhotoCard(
-	photo: Photo,
-	navigateToSinglePhotoScreen: (Int) -> Unit = {},
-	viewModel: AppViewModel
+	photo: Photo, navigateToSinglePhotoScreen: (Int) -> Unit = {}, viewModel: AppViewModel
 ) {
 	val imageId = photo.resourceId
 
@@ -116,7 +119,7 @@ fun PhotoCard(
 			Column(
 				modifier = Modifier
 					.align(Alignment.BottomStart)
-					.padding(8.dp)
+					.padding(dimensionResource(id = R.dimen.padding_small))
 					.background(Color.Black.copy(alpha = 0.6f))
 			) {
 				Text(
@@ -129,5 +132,19 @@ fun PhotoCard(
 				)
 			}
 		}
+	}
+}
+
+@Preview
+@Composable
+fun PhotoScreenPreview() {
+	val viewModel = AppViewModel()
+	val db = Database()
+	viewModel.updateSelection(
+		mode = SelectionMode.ARTIST,
+		selectedItem = db.findAllArtists()[0].name
+	)
+	AppTheme {
+		PhotoScreen(viewModel, rememberNavController())
 	}
 }

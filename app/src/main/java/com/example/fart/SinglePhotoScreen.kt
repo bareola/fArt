@@ -30,14 +30,18 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.example.fart.data.AppViewModel
 import com.example.fart.data.Frame
 import com.example.fart.data.Framewidth
 import com.example.fart.data.Photo
 import com.example.fart.data.Size
-
+import com.example.fart.ui.theme.AppTheme
+import kotlin.math.pow
+import kotlin.math.roundToInt
 
 
 @Composable
@@ -45,9 +49,22 @@ fun FrameChoiceRadioButton(viewModel: AppViewModel) {
 	val uiState = viewModel.uiState.collectAsState()
 
 	val options = listOf(
-		Pair(R.string.size, Size.entries.map { it.type to "${it.type} - $${it.price}" }),
-		Pair(R.string.frame_material, Frame.entries.map { it.type to "${it.type} - $${(it.price * uiState.value.selectedSize.price) - uiState.value.selectedSize.price}" }),
-		Pair(R.string.frame_width, Framewidth.entries.map { it.size to "${it.size} - $${it.price}" })
+		Pair(
+			R.string.size,
+			Size.entries.map { it.type to "${it.type}: $${it.price}" }
+		),
+		Pair(
+			R.string.frame_material,
+			Frame.entries.map {
+				it.type to "${it.type}: $${((uiState.value.selectedSize.price * it.price) - uiState.value.selectedSize.price).roundTo(2)}"
+			}
+		),
+		Pair(
+			R.string.frame_width,
+			Framewidth.entries.map {
+				it.size to "${it.size}: $${((uiState.value.selectedSize.price + (uiState.value.selectedSize.price * uiState.value.selectedFrame.price) - uiState.value.selectedSize.price) * it.price - (uiState.value.selectedSize.price + (uiState.value.selectedSize.price * uiState.value.selectedFrame.price) - uiState.value.selectedSize.price)).roundTo(2)}"
+			}
+		)
 	)
 
 	Column {
@@ -63,9 +80,14 @@ fun FrameChoiceRadioButton(viewModel: AppViewModel) {
 				},
 				onOptionSelected = { selectedType ->
 					when (titleRes) {
-						R.string.size -> Size.fromType(selectedType)?.let { viewModel.setSelectedSize(it) }
-						R.string.frame_material -> Frame.fromType(selectedType)?.let { viewModel.setSelectedFrame(it) }
-						R.string.frame_width -> Framewidth.fromSize(selectedType)?.let { viewModel.setSelectedFrameWidth(it) }
+						R.string.size -> Size.fromType(selectedType)
+							?.let { viewModel.setSelectedSize(it) }
+
+						R.string.frame_material -> Frame.fromType(selectedType)
+							?.let { viewModel.setSelectedFrame(it) }
+
+						R.string.frame_width -> Framewidth.fromSize(selectedType)
+							?.let { viewModel.setSelectedFrameWidth(it) }
 					}
 				}
 			)
@@ -73,15 +95,21 @@ fun FrameChoiceRadioButton(viewModel: AppViewModel) {
 	}
 }
 
+
 @Composable
-fun SettingCard(title: String, entries: List<Pair<String, String>>, selectedOption: String, onOptionSelected: (String) -> Unit) {
+fun SettingCard(
+	title: String,
+	entries: List<Pair<String, String>>,
+	selectedOption: String,
+	onOptionSelected: (String) -> Unit
+) {
 	Card(
 		border = BorderStroke(1.dp, Color.Gray),
 		modifier = Modifier
 			.fillMaxWidth()
 			.padding(vertical = 4.dp, horizontal = 8.dp)
 	) {
-		Column(modifier = Modifier.padding(8.dp)) {
+		Row(modifier = Modifier.padding(8.dp)) {
 			Text(
 				text = title,
 				style = MaterialTheme.typography.labelLarge,
@@ -93,20 +121,26 @@ fun SettingCard(title: String, entries: List<Pair<String, String>>, selectedOpti
 }
 
 @Composable
-fun RadioButtonGroup(options: List<Pair<String, String>>, selectedOption: String, onOptionSelected: (String) -> Unit) {
-	options.forEach { (type, displayString) ->
-		Row(Modifier.clickable { onOptionSelected(type) }) {
-			RadioButton(
-				selected = type == selectedOption,
-				onClick = { onOptionSelected(type) }
-			)
-			Text(
-				text = displayString,
-				style = MaterialTheme.typography.bodySmall,
-				modifier = Modifier
-					.padding(start = 8.dp)
-					.align(Alignment.CenterVertically)
-			)
+fun RadioButtonGroup(
+	options: List<Pair<String, String>>,
+	selectedOption: String,
+	onOptionSelected: (String) -> Unit
+) {
+	Column(modifier = Modifier.fillMaxWidth()) {
+		options.forEach { (type, displayString) ->
+			Row(Modifier
+				.clickable { onOptionSelected(type) }
+				.align(Alignment.End)) {
+				Text(
+					text = displayString,
+					style = MaterialTheme.typography.bodySmall,
+					modifier = Modifier
+						.padding(start = 8.dp)
+						.align(Alignment.CenterVertically)
+				)
+				RadioButton(selected = type == selectedOption, onClick = { onOptionSelected(type) })
+
+			}
 		}
 	}
 }
@@ -144,34 +178,42 @@ fun PhotoDetailContent(
 			.padding(horizontal = 12.dp, vertical = 8.dp)
 	) {
 		item {
-			Image(
-				painter = painterResource(id = photo.resourceId),
-				contentDescription = photo.title,
-				modifier = Modifier
-					.fillMaxWidth()
-					.aspectRatio(1.5f),
-				contentScale = ContentScale.Crop
-			)
+			Card(elevation = CardDefaults.cardElevation(dimensionResource(id = R.dimen.elevation_small))) {
+				Image(
+					painter = painterResource(id = photo.resourceId),
+					contentDescription = photo.title,
+					modifier = Modifier
+						.fillMaxWidth()
+						.aspectRatio(1.5f),
+					contentScale = ContentScale.Crop
+				)
+			}
 			Spacer(modifier = Modifier.height(8.dp))
 		}
 		item {
 			Card(
 				elevation = CardDefaults.cardElevation(dimensionResource(id = R.dimen.elevation_small)),
-				modifier = Modifier.fillMaxWidth()
+				modifier = Modifier.fillMaxWidth(),
 			) {
 				Column(Modifier.padding(12.dp)) {
-					Text(
-						text = stringResource(id = R.string.photo_details),
-						style = MaterialTheme.typography.titleMedium
-					)
-					Text(
-						text = stringResource(id = R.string.photo_details_body, photo.artist(), photo.price),
-						style = MaterialTheme.typography.bodySmall
-					)
-					Text(
-						text = stringResource(id = R.string.photo_details_categories, photo.categoriesJoined()),
-						style = MaterialTheme.typography.bodySmall
-					)
+					 Card(
+						modifier = Modifier.fillMaxWidth()
+					) {
+						Text(
+							text = stringResource(id = R.string.photo_details),
+							style = MaterialTheme.typography.titleMedium
+						)
+						Text(
+							text = stringResource(
+								id = R.string.photo_details_body, photo.artist(), photo.price
+							), style = MaterialTheme.typography.bodySmall
+						)
+						Text(
+							text = stringResource(
+								id = R.string.photo_details_categories, photo.categoriesJoined()
+							), style = MaterialTheme.typography.bodySmall
+						)
+					}
 					Divider(
 						color = Color.Gray,
 						thickness = 1.dp,
@@ -214,4 +256,29 @@ fun PhotoDetailContent(
 			}
 		}
 	}
+}
+
+@Preview
+@Composable
+fun SinglePhotoScreenPreview() {
+	val photo = Photo(
+		id = 1,
+		title = "Photo Title",
+		resourceId = R.drawable.ola_giaever,
+		categories = emptyList(),
+		price = 100.0
+	)
+	val viewModel = AppViewModel()
+	AppTheme {
+
+		PhotoDetailContent(
+			photo = photo,
+			viewModel = viewModel,
+			navController = rememberNavController()
+		)
+	}
+}
+fun Double.roundTo(decimals: Int): Double {
+	val multiplier = 10.0.pow(decimals.toDouble())
+	return (this * multiplier).roundToInt() / multiplier
 }

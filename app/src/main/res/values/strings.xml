@@ -19,6 +19,6 @@
     <string name="frame_width">Frame width:</string>
     <string name="payment_title">Payment confirmation</string>
     <string name="payment_processed">Your payment has been processed!</string>
-    <string name="shopping_cart">My cart</string>
-    <string name="empty_cart">Your cart is empty.</string>
+    <string name="shopping_cart">My cart:</string>
+    <string name="empty_cart">Nothing in cart.</string>
 </resources>
