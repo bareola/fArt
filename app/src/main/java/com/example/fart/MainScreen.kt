@@ -246,7 +246,8 @@ fun ChooseBasedOn(navigateToSelectScreen: (String) -> Unit, appViewModel: AppVie
 				onClick = {
 					appViewModel.updateSelection(SelectionMode.ARTIST)
 					navigateToSelectScreen(SelectionMode.ARTIST.name)
-				}, modifier = Modifier.weight(1f)
+				}, modifier = Modifier
+					.weight(1f)
 			) {
 				Text(text = stringResource(id = R.string.artist))
 			}
