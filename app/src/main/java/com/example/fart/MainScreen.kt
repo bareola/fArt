@@ -38,6 +38,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -248,6 +249,7 @@ fun ChooseBasedOn(navigateToSelectScreen: (String) -> Unit, appViewModel: AppVie
 					navigateToSelectScreen(SelectionMode.ARTIST.name)
 				}, modifier = Modifier
 					.weight(1f)
+					.testTag("artist_button")
 			) {
 				Text(text = stringResource(id = R.string.artist))
 			}
@@ -257,6 +259,7 @@ fun ChooseBasedOn(navigateToSelectScreen: (String) -> Unit, appViewModel: AppVie
 					appViewModel.updateSelection(SelectionMode.CATEGORY)
 					navigateToSelectScreen(SelectionMode.CATEGORY.name)
 				}, modifier = Modifier.weight(1f)
+					.testTag("category_button")
 			) {
 				Text(text = stringResource(id = R.string.category))
 			}

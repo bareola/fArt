@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -25,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -37,12 +39,13 @@ import com.example.fart.data.SelectionMode
 import com.example.fart.ui.theme.AppTheme
 
 @Composable
-fun ItemCard(item: ListItem, onItemSelect: (String) -> Unit) {
+fun ItemCard(item: ListItem, onItemSelect: (String) -> Unit, tag: String) {
 	Card(
 		modifier = Modifier
 			.fillMaxWidth()
 			.clickable(onClick = { onItemSelect(item.name()) })
-			.padding(dimensionResource(R.dimen.padding_small)),
+			.padding(dimensionResource(R.dimen.padding_small))
+			.testTag(tag),
 		shape = RoundedCornerShape(dimensionResource(R.dimen.card_rounded_corner)),
 		elevation = CardDefaults.cardElevation(dimensionResource(R.dimen.elevation_small)),
 		border = BorderStroke(1.dp, Color.Gray),
@@ -92,40 +95,54 @@ fun ItemCard(item: ListItem, onItemSelect: (String) -> Unit) {
 }
 
 
+
 @Composable
 fun SelectList(
-	items: List<ListItem>, onItemSelect: (String) -> Unit, paddingValues: PaddingValues
+	items: List<ListItem>,
+	onItemSelect: (String) -> Unit,
+	paddingValues: PaddingValues
 ) {
-	Column(
+	LazyColumn(
 		modifier = Modifier
 			.padding(paddingValues)
 			.fillMaxWidth()
 	) {
-		items.forEach { item ->
-			ItemCard(item = item, onItemSelect = onItemSelect)
+		items(items.size) { index ->
+			val item = items[index]
+			ItemCard(item = item, onItemSelect = onItemSelect, tag = "itemCard${index + 1}")
 		}
 	}
 }
 
 
+
 @Composable
 fun SelectScreen(
-	navigateToPhotoScreen: (String) -> Unit, viewModel: AppViewModel, navController: NavController
+	navigateToPhotoScreen: (String) -> Unit,
+	viewModel: AppViewModel,
+	navController: NavController
 ) {
 	val uiState by viewModel.uiState.collectAsState()
-	Scaffold(topBar = {
-		CustomAppBar(
-			title = getSelectScreenTitle(uiState.selectionMode), navController = navController
-		)
-	}, content = { paddingValues ->
-		SelectList(
-			items = getItemsForSelectionMode(uiState), onItemSelect = { selectedItem ->
-				viewModel.updateSelection(uiState.selectionMode, selectedItem)
-				navigateToPhotoScreen(selectedItem)
-			}, paddingValues = paddingValues
-		)
-	})
+	Scaffold(
+		topBar = {
+			CustomAppBar(
+				title = getSelectScreenTitle(uiState.selectionMode),
+				navController = navController
+			)
+		},
+		content = { paddingValues ->
+			SelectList(
+				items = getItemsForSelectionMode(uiState),
+				onItemSelect = { selectedItem ->
+					viewModel.updateSelection(uiState.selectionMode, selectedItem)
+					navigateToPhotoScreen(selectedItem)
+				},
+				paddingValues = paddingValues
+			)
+		}
+	)
 }
+
 
 fun getSelectScreenTitle(selectionMode: SelectionMode): String = when (selectionMode) {
 	SelectionMode.ARTIST -> "Select Artist"
@@ -143,7 +160,7 @@ fun getItemsForSelectionMode(uiState: AppUiState): List<ListItem> = when (uiStat
 @Composable
 fun SelectScreenPreview() {
 	val viewModel = AppViewModel()
-	viewModel.updateSelection(SelectionMode.ARTIST, "Artist 1")
+	viewModel.updateSelection(SelectionMode.CATEGORY, "Artist 1")
 	AppTheme {
 		SelectScreen(
 			navigateToPhotoScreen = {},

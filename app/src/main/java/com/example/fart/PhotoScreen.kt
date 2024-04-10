@@ -26,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -46,15 +47,22 @@ fun PhotoScreen(
 	navigateToSinglePhotoScreen: (Int) -> Unit = {}
 ) {
 	val uiState = viewModel.uiState.collectAsState().value
-	Scaffold(topBar = { CustomAppBar(title = if (uiState.selectionMode == SelectionMode.ARTIST) {uiState.selectedArtist} else {uiState.selectedCategory}, navController = navController) },
-		content = { paddingValues ->
-			PhotoGrid(
-				uiState = uiState,
-				paddingValues = paddingValues,
-				navigateToSinglePhotoScreen = navigateToSinglePhotoScreen,
-				viewModel = viewModel
-			)
-		})
+	Scaffold(topBar = {
+		CustomAppBar(
+			title = if (uiState.selectionMode == SelectionMode.ARTIST) {
+				uiState.selectedArtist
+			} else {
+				uiState.selectedCategory
+			}, navController = navController
+		)
+	}, content = { paddingValues ->
+		PhotoGrid(
+			uiState = uiState,
+			paddingValues = paddingValues,
+			navigateToSinglePhotoScreen = navigateToSinglePhotoScreen,
+			viewModel = viewModel
+		)
+	})
 }
 
 
@@ -79,7 +87,8 @@ fun PhotoGrid(
 			PhotoCard(
 				photo = photos[index],
 				navigateToSinglePhotoScreen = navigateToSinglePhotoScreen,
-				viewModel = viewModel
+				viewModel = viewModel,
+				tag = "photoCard${index + 1}"
 			)
 		}
 	}
@@ -88,19 +97,20 @@ fun PhotoGrid(
 
 @Composable
 fun PhotoCard(
-	photo: Photo, navigateToSinglePhotoScreen: (Int) -> Unit = {}, viewModel: AppViewModel
+	photo: Photo,
+	navigateToSinglePhotoScreen: (Int) -> Unit = {},
+	viewModel: AppViewModel,
+	tag: String
 ) {
-	val imageId = photo.resourceId
-
 	Card(modifier = Modifier
 		.clickable {
-			viewModel.setSelectedItem(photo); navigateToSinglePhotoScreen(
-			photo.id
-		)
+			viewModel.setSelectedItem(photo)
+			navigateToSinglePhotoScreen(photo.id)
 		}
 		.fillMaxWidth()
 		.aspectRatio(1f)
-		.padding(8.dp),
+		.padding(8.dp)
+		.testTag(tag),
 		shape = RoundedCornerShape(12.dp),
 		elevation = CardDefaults.cardElevation(dimensionResource(id = R.dimen.elevation_small))) {
 		Box(
@@ -111,7 +121,7 @@ fun PhotoCard(
 			)
 		) {
 			Image(
-				painter = painterResource(id = imageId),
+				painter = painterResource(id = photo.resourceId),
 				contentDescription = photo.title,
 				contentScale = ContentScale.Crop,
 				modifier = Modifier.fillMaxSize()
@@ -135,14 +145,14 @@ fun PhotoCard(
 	}
 }
 
+
 @Preview
 @Composable
 fun PhotoScreenPreview() {
 	val viewModel = AppViewModel()
 	val db = Database()
 	viewModel.updateSelection(
-		mode = SelectionMode.ARTIST,
-		selectedItem = db.findAllArtists()[0].name
+		mode = SelectionMode.ARTIST, selectedItem = db.findAllArtists()[0].name
 	)
 	AppTheme {
 		PhotoScreen(viewModel, rememberNavController())

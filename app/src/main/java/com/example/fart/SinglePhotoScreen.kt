@@ -27,6 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -115,22 +116,32 @@ fun SettingCard(
 				style = MaterialTheme.typography.labelLarge,
 				modifier = Modifier.padding(bottom = 4.dp)
 			)
-			RadioButtonGroup(entries, selectedOption, onOptionSelected)
+			// Just for testing purposes
+			val groupName = when(title) {
+				stringResource(id = R.string.size) -> "size"
+				stringResource(id = R.string.frame_material) -> "material"
+				stringResource(id = R.string.frame_width) -> "width"
+				else -> "unknown"
+			}
+			RadioButtonGroup(groupName, entries, selectedOption, onOptionSelected)
 		}
 	}
 }
 
 @Composable
 fun RadioButtonGroup(
+	groupName: String,
 	options: List<Pair<String, String>>,
 	selectedOption: String,
 	onOptionSelected: (String) -> Unit
 ) {
 	Column(modifier = Modifier.fillMaxWidth()) {
-		options.forEach { (type, displayString) ->
+		options.forEachIndexed { index, (type, displayString) ->
 			Row(Modifier
 				.clickable { onOptionSelected(type) }
-				.align(Alignment.End)) {
+				.align(Alignment.End)
+				.testTag("$groupName$index")
+			) {
 				Text(
 					text = displayString,
 					style = MaterialTheme.typography.bodySmall,
@@ -139,11 +150,11 @@ fun RadioButtonGroup(
 						.align(Alignment.CenterVertically)
 				)
 				RadioButton(selected = type == selectedOption, onClick = { onOptionSelected(type) })
-
 			}
 		}
 	}
 }
+
 
 @Composable
 fun SinglePhotoScreen(
@@ -233,7 +244,8 @@ fun PhotoDetailContent(
 								}
 							}
 						},
-						modifier = Modifier.fillMaxWidth(),
+						modifier = Modifier.fillMaxWidth()
+							.testTag("addToCartButton"),
 						elevation = ButtonDefaults.buttonElevation(0.dp)
 					) {
 						Text("Add to Cart")
@@ -247,7 +259,8 @@ fun PhotoDetailContent(
 								}
 							}
 						},
-						modifier = Modifier.fillMaxWidth(),
+						modifier = Modifier.fillMaxWidth()
+							.testTag("goHomeButton"),
 						elevation = ButtonDefaults.buttonElevation(0.dp)
 					) {
 						Text("Go Home")
